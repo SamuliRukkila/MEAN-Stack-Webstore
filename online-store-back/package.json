@@ -1,7 +1,7 @@
 {
   "name": "Suhautus-backend",
   "version": "1.0.0",
-  "description": "Suhautus-websovelluskauppa. Backend-puoli.",
+  "description": "Suhautus-websovelluskauppa. Palvelinpuoli.",
   "keywords": [
     "server"
   ],

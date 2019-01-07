@@ -6,7 +6,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 // Cors mahdollistaa datan kulun eri osoitteista sijaitsevien sovellusten kesken.
 const cors = require('cors');
-// Timestampit 
+// Timestampit
 require('log-timestamp');
 // Yhteys MongoDB:n
 require('./dbconn');
@@ -43,6 +43,6 @@ require('./routes/product.routes.js')(app);
 const port = process.env.PORT || 3000;
 
 // Kuunnellaan pyyntöjä portista 3000
-app.listen(3000, () => {
+app.listen(port, () => {
     console.log('@@ SERVER @@: Server is listening on port ' + port);
 });
