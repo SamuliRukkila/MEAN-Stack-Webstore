@@ -1,0 +1,211 @@
+<div class='row'>
+  <div class='col-md-6 border-right' *ngIf='user'>
+    <h4>Minun tietoni</h4>
+
+    <div *ngIf='getUserInfoFailed' class='alert alert-warning'>
+      {{ getUserInfoFailed }}
+    </div>
+
+    <!-- Päivit tiedot -formi -->
+    <form (ngSubmit)='updateValues(updateValuesForm.value)' class='pb-3 pt-3'
+      #updateValuesForm='ngForm' novalidate>
+
+      <!-- Etunimi -->
+      <div class='form-group'>
+        <label>Etunimi</label>
+        <input type='text' name='firstname' class='form-control'
+          [(ngModel)]='user.firstname' required ngModel>
+      </div>
+
+      <!-- Sukunimi -->
+      <div class='form-group'>
+        <label>Sukunimi</label>
+        <input type='text' name='surname' class='form-control'
+          [(ngModel)]='user.surname' required ngModel>
+      </div>
+
+      <!-- Sähköposti -->
+      <div class='form-group'>
+        <label>Sähköposti</label>
+        <input disabled type='email' name='email' class='form-control'
+          [(ngModel)]='user.email' required ngModel>
+      </div>
+
+      <!-- Lähiosoite -->
+      <div class='form-row'>
+        <div class='form-group col-sm-8'>
+          <label>Lähiosoite</label>
+          <input type='text' name='address' class='form-control'
+            [(ngModel)]='user.address' required ngModel>
+        </div>
+
+        <!-- Postinumero -->
+        <div class='form-group col-sm'>
+          <label>Postinumero</label>
+          <input type='text' name='postnumber' class='form-control'
+            [(ngModel)]='user.postnumber' required ngModel pattern='[0-9]{5}$'>
+        </div>
+      </div>
+
+      <!-- Postitoimipaikka -->
+      <div class='form-group'>
+        <label>Postitoimipaikka</label>
+        <input type='text' name='city' class='form-control form-control'
+          [(ngModel)]='user.city' required ngModel>
+      </div>
+
+      <!-- Uutiskirje -->
+      <div class='form-group'>
+        <div class='form-check'>
+          <input type='checkbox' name='send_email' class='form-check-input'
+            [(ngModel)]='user.send_email' ngModel>
+          <label class='form-check-label' for='send_email'>
+            Minulle saa lähettää uutiskirjeitä
+          </label>
+        </div>
+      </div>
+
+      <!-- Lähetä -painike, jota ei voida painaa jossei formi ole kunnossa -->
+      <div class='form-row'>
+        <button type='submit'
+          [disabled]='!updateValuesForm.form.valid || !updateValuesForm.form.dirty'
+          class='btn btn-success'> Päivitä tietoni
+        </button>
+      </div>
+
+    </form>
+
+    <!-- Tietojen päivitys onnistui/epäonnistui -->
+    <div *ngIf='updSuccess' [hidden]='updFailed' class='alert alert-success'>
+      {{ updSuccess }}
+    </div>
+    <div *ngIf='updFailed' [hidden]='updSuccess' class='alert alert-danger'>
+      {{ updFailed }}
+    </div>
+
+  </div>
+
+  <!-- Päivitä salasana sekä poista tunnukset -->
+  <div class='col-md'>
+
+    <h4>Päivitä salasanani </h4>
+    <form (ngSubmit)='updatePwd(updatePwdForm.value); updatePwdForm.reset();'
+      class='pb-3 pt-3' #updatePwdForm='ngForm' novalidate>
+      <!-- Vanha salasana -->
+      <div class='form-group'>
+        <label>Vanha salasana</label>
+        <input type='password' name='oldPwd' class='form-control'
+          ngModel required #oldPwd='ngModel'
+            pattern='((?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,30})'>
+      </div>
+      <!-- Uusi salasana -->
+      <div class='form-group'>
+        <label>Uusi salasana</label>
+        <input type='password' name='newPwd' class='form-control'
+          ngModel required #newPwd='ngModel'
+            pattern='((?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,30})'>
+      </div>
+
+      <!-- Muistutus -->
+      <small><p>Salasanan pitää sisältää vähintään 8 merkkiä, yhden numeron sekä
+         yhden ison ja pienen kirjaimen.</p></small>
+      <!-- Lähetä kysely salasanan uudistamisesta -->
+      <button type='submit' class='btn btn-primary'
+        [disabled]='!updatePwdForm.form.valid'>Päivitä salasana
+      </button>
+    </form>
+
+    <div *ngIf='pwdUpdateSuccess' class='alert alert-success'>
+      {{ pwdUpdateSuccess }}
+    </div>
+    <div *ngIf='pwdUpdateFailed' class='alert alert-danger'>
+      {{ pwdUpdateFailed }}
+    </div>
+
+    <hr>
+
+    <!-- Tunnusten poistaminen -->
+    <h4>Poista tunnukseni</h4>
+    <small>(Tunnuksia ei voi palauttaa)</small>
+    <form (ngSubmit)='deleteUser(deleteUserForm.value); deleteUserForm.reset();'
+      class='pb-3 pt-3' #deleteUserForm='ngForm' novalidate>
+      <div class='form-row'>
+        <!-- Salasana -->
+        <div class='form-group col-md-6'>
+          <label>Salasana</label>
+          <input type='password' name='password' class='form-control'
+            ngModel required #password='ngModel'
+            pattern='((?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,30})'>
+        </div>
+        <!-- Salasana uudestaan -->
+        <div class='form-group col-md'>
+          <label>Salasana uudestaan</label>
+          <input type='password' name='rePassword' class='form-control'
+            ngModel required #rePassword='ngModel'
+              pattern='((?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,30})'>
+        </div>
+      </div>
+      <!-- Viimeinen varmistus -->
+      <div class='form-group'>
+        <button type='submit' class='btn btn-danger'
+          [disabled]='!deleteUserForm.form.valid'>Poista tunnukseni ikuisesti
+        </button>
+      </div>
+    </form>
+
+    <div *ngIf='deleteAccountSuccess' class='alert alert-success'>
+      {{ deleteAccountSuccess }}
+    </div>
+    <div *ngIf='deleteAccountFailed' class='alert alert-danger'>
+      {{ deleteAccountFailed }}
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- Tilaushistoria -->
+<h4 class='pt-3 pb-3'>Tilaushistoria</h4>
+
+<div *ngIf='user && user.purchase_history && user.purchase_history.length < 1'>
+    Et ole vielä tehnyt yhtäkään tilausta.
+</div>
+
+<div *ngIf='user && user.purchase_history'>
+  <div *ngFor='let purchases of user.purchase_history; let i = index' class='mb-5'>
+    <div class='border p-4'>
+      <div class='row'>
+        <div class='col-md'>
+          <h4>Tilaus {{ i + 1 }}</h4>
+        </div>
+        <div class='col-md'>
+          <b>Maksutapa:</b> {{ purchases.payment_type}}
+        </div>
+        <div class='col-md'>
+          <b>Hinta:</b> {{ purchases.price }} €
+        </div>
+        <div class='col-md'>
+          <b>Päivämäärä:</b> {{ purchases.date | date: 'MM/dd/yyyy, hh:mm a' }}
+        </div>
+        <div class='col-md'>
+          <b>Tuotteiden lukumäärä:</b> {{ purchases.products.length }}
+        </div>
+      </div>
+      <div class='row border p-3 my-4' *ngFor='let p of purchases.products'>
+        <div class='col-md'>
+          <img [src]='imageurl + p.img' [alt]='p.name' class='img-fluid'
+            width='45px' height='45px'>
+        </div>
+        <div class='col-md'>
+          {{ p.name }}
+        </div>
+        <div class='col-md'>
+          {{ p.price }} €
+        </div>
+        <div class='col-md'>
+          Kappalemäärä: {{ p.amount }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

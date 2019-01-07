@@ -1,0 +1,195 @@
+<!-- YLEMPI NAVIGOINTIPALKKI -->
+<nav class='navbar navbar-expand-sm navbar-light bg-light'>
+
+  <!-- Logo sekä otsikko -->
+  <div class='d-inline-block'>
+    <a class='navbar-brand' routerLink='/etusivu'>
+      <img src='../../assets/img/header-logo.svg'
+        width='45px' height='40' alt='logo'>
+      uhautus <small> - se ainoa oikea IT-jälleenmyyjä.</small>
+    </a>
+  </div>
+
+
+  <!-- Muuttaa ylemmän navigointipalkin responsiiviseksi kun leveys on
+    tarpeeksi pieni -->
+  <button class='navbar-toggler' type='button' data-toggle='collapse'
+    data-target='#navbar' aria-controls='navbar' aria-expanded='false'
+      aria-label='Toggle navigation'>
+    <span class='navbar-toggler-icon'></span>
+  </button>
+
+  <!-- Ylemmän navigointipalkin linkit, jotka muuttuvat responsiivisiksi
+    kun näyttö on tarpeeksi pieni. -->
+  <div class='collapse navbar-collapse' id='navbar'>
+    <ul class='navbar-nav ml-auto'>
+      <li class='nav-item'>
+        <a class='nav-link text-body' routerLinkActive='active'
+          routerLink='/tietoa'> Tietoa meistä
+        </a>
+      </li>
+      <li class='nav-item'>
+        <a class='nav-link text-body' routerLinkActive='active'
+          routerLink='/faq'> FAQ
+        </a>
+      </li>
+      <li class='nav-item'>
+        <a class='nav-link text-body pr-5' routerLinkActive='active'
+          routerLink='/asiakaspalvelu'> Asiakaspalvelu
+        </a>
+      </li>
+      <!-- Jos et ole kirjautunut sisään -->
+      <li class='nav-item' *ngIf='!login'>
+        <a class='nav-link text-body' routerLinkActive='active'
+          routerLink='/kirjaudu'> Kirjaudu sisään
+        </a>
+      </li>
+      <!-- Jos olet kirjautunut sisään -->
+      <li class='dropdown' *ngIf='login'>
+        <button class='btn btn-secondary dropdown-toggle' type='button'
+          id='userinfo-dropdown' data-toggle='dropdown' aria-haspopup='true'
+            aria-expanded='false'>
+          {{ login }} <span *ngIf='admin'> [Admin] </span>
+        </button>
+        <div class='dropdown-menu' style='right: 0; left: auto; z-index: 9999;'
+          aria-labelledby='#userinfo-dropdown'>
+          <li class='nav-item' *ngIf='admin'>
+            <a class='nav-link text-body' href='/admin'>Admin</a>
+          </li>
+          <li class='nav-item'>
+            <a class='nav-link text-body' routerLink='/profiili'>Profiili</a>
+          </li>
+          <li class='nav-item'>
+            <a class='nav-link text-body' (click)='logout()'
+              routerLink='/etusivu'> Kirjaudu ulos
+            </a>
+          </li>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+</nav>
+<!-- YLEMPI NAVBAR -->
+
+
+
+
+<!-- ALEMPI NAVBAR -->
+<nav class='navbar navbar-dark bg-dark sticky-top'>
+
+  <!-- Tuotteiden haku sekä haun tulokset -->
+  <form id='search-form' #searchForm='ngForm'>
+    <input class='form-control' #searchBar id='search-bar' type='text'
+      placeholder='Hae tuotteita..' (input)='search(searchBar.value)'>
+    <div class='position-absolute'>
+      <ul class='navbar-nav rounded'>
+        <li class='nav-item p-3 bg-light dropdown-results'
+        *ngFor='let product of products$ | async'>
+          <hr>
+          <a routerLink='tuote/{{product.safename}}'
+          (click)='this.form.reset()' class='text-dark'>
+            <div class='row'>
+              <div class='col'>
+                {{ product.name }} <small> | {{ product.price }}€</small>
+              </div>
+              <div class='col-2'>
+                <img class='img-fluid' [src]='imageurl + product.img'
+                  [alt]='product.name' width='40px' height='40px'>
+              </div>
+            </div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </form>
+
+
+  <!-- Kaikki tuotelajit (kun näytön leveys on tarpeeksi suuri) -->
+  <ul class='navbar-nav flex-row'>
+    <li class='nav-item' *ngFor='let type of productTypes'>
+      <a class='pl-4 pr-4 nav-link categories' routerLinkActive
+        routerLink='tuotelaji/{{ type.safetype }}'> {{ type.type }}
+      </a>
+    </li>
+  </ul>
+
+  <!-- Oikealla reunassa olevat painikkeet. (2. navigointipalkki) -->
+  <ul class='navbar-nav flex-row'>
+    <!-- Kaikki tuotelajit (kun näytön leveys on tarpeeksi pieni) -->
+    <li class='nav-item pr-2'>
+      <div class='dropdown'>
+        <button class='btn btn-secondary dropdown-toggle' type='button'
+          id='categories-dropdown' data-toggle='dropdown' aria-haspopup='true'
+            aria-expanded='false'>
+          <i class='fa fa-cubes'></i>
+        </button>
+        <div class='dropdown-menu position-absolute' style='right: 0; left: auto;'
+          aria-labelledby='#categories-dropdown'>
+          <a *ngFor='let type of productTypes' class='dropdown-item'
+            routerLink='tuotelaji/{{ type.safetype }}'> {{ type.type }}
+          </a>
+        </div>
+      </div>
+    </li>
+
+    <!-- Kassalle -nappi -->
+    <li class='nav-item pr-2' id='payment'>
+      <button routerLink='/maksu' class='btn btn-success' type='button'
+        [disabled]='productCart && productCart.length < 1'>
+          <i class='fa fa-credit-card'></i>
+      </button>
+    </li>
+
+    <!-- Tuotekori -->
+    <li class='nav-item'>
+      <div class='dropdown'>
+        <button class='btn btn-primary dropdown-toggle' type='button'
+          id='items-basket-dropdown' data-toggle='dropdown'
+            aria-haspopup='true' aria-expanded='true'>
+          {{ countProducts(productCart) }} <i class='fa fa-cart-arrow-down'></i>
+        </button>
+        <ul class='dropdown-menu dropdown-cart position-absolute'
+            aria-labelledby='#items-basket-dropdown'
+            role='menu' style='right: 0; left: auto;'>
+          <li class='nav-item dropdown-cart'>
+            <div class='row px-2 pb-0 mb-0 center-block text-center'>
+              <div class='col pt-1'>
+                <button routerLink='/maksu' class='btn btn-block btn-success'
+                  type='button' [disabled]='productCart && productCart.length < 1'>
+                   <i class='fa fa-credit-card'></i> Tilaukseen
+                </button>
+              </div>
+              <div class='col pt-1'>
+                <button class='btn btn-primary btn-block read'>
+                    Yhteissumma: {{ calcPrice(productCart) }} &euro;
+                </button>
+              </div>
+            </div>
+          </li>
+          <li *ngIf='productCart && productCart.length < 1' class='p-3 text-center'>
+            Ostoskorissasi ei ole vielä tuotteita
+          </li>
+          <li *ngFor='let product of productCart' class='dropdown-cart p-3 text-center'>
+            <hr>
+            <img [src]='imageurl + product.img' [alt]='product.safename'
+              class='img-fluid pull-left' height='50px' width='50px'>
+            <span class='pl-3 pull-left'>
+              {{ product.name }}
+              <small>({{ product.price }} €)</small>
+            </span>
+            <div class='bg-dark mb-2 d-inline-block p-1 rounded pull-right'>
+              <span class='py-1 px-2 text-light rounded bg-primary'>
+                {{ product.amount }}
+              </span>
+              <button (click)='removeFromBasket(product.ean)'
+                class='px-2 py-0 btn btn-danger ml-2'><i class='fa fa-trash'></i>
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </li>
+  </ul>
+
+</nav>

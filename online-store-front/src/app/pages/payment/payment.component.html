@@ -1,0 +1,120 @@
+<p class='alert alert-danger'>Kyseessä on ammattikorkeakoulun lopputyö. Sivusto
+EI ole oikea verkkokauppa. Älä anna oikeita tietojasi, koska ne säilytetään verkossa
+olevassa tietokannassa eikä tietojen täydellistä turvallisuutta voida varmistaa.
+Lähetyksesi eivät siirry mihinkään.</p>
+
+<h4 class='mb-4'>Tilauksen yhteenveto</h4>
+
+<!-- Tuotetilauksen tiedot -->
+<div class='table-responsive'>
+  <table class='table'>
+    <thead>
+      <tr>
+        <th></th>
+        <th>Nimi</th>
+        <th>Hinta</th>
+        <th>Määrä</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngIf='!products || products.length < 1'>
+        <td colspan='8'>Ostoskorissa ei ole tuotteita</td>
+      </tr>
+      <tr *ngFor='let p of products'>
+        <td>
+          <img width='40px' height='40px'
+            src='{{ imageurl + p.img }}' alt='p.safename'>
+        </td>
+        <td>{{ p.name }}</td>
+        <td>{{ p.price }}</td>
+        <td>{{ p.amount }}</td>
+        <td>
+          <button type='button' class='btn btn-danger px-1 py-0'
+            (click)='removeFromBasket(p.ean)'><i class='fa fa-trash'></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Tuotteita yht. ja yhteissumma tuotetilaukselle -->
+  <table class='table'>
+    <tr class='table-primary'>
+      <td colspan='6'>Tuotteita yhteensä</td>
+      <th>{{ countProducts(products) }}</th>
+    </tr>
+    <tr class='table-success'>
+      <td colspan='6'>Loppusumma</td>
+      <th>{{ calcPrice(products) }} €</th>
+    </tr>
+  </table>
+</div>
+
+<hr>
+
+<!-- Käyttäjän tiedot -->
+<h4 class='mb-3'>Tarkista tietosi</h4>
+<ul class='navbar-nav' *ngIf='userinfo'>
+  <li>Etunimi: <b>{{ userinfo.firstname }}</b></li>
+  <li>Sukunimi: <b>{{ userinfo.surname }}</b></li>
+  <li>Sähköposti: <b>{{ userinfo.email }}</b></li>
+  <li>Osoite: <b>{{ userinfo.address }}, {{ userinfo.postnumber }}
+    {{ userinfo.city }}</b></li>
+</ul>
+<a routerLink='/profiili'>
+  <button class='btn btn-primary mt-3' type='button'>
+    Haluan muuttaa tietojani
+  </button>
+</a>
+
+<hr>
+
+<!-- Tuotetilauksen maksu sekä varmistus -->
+<h4 class='mb-1'>Maksu ja varmistus</h4>
+<small>Tilauksen maksutapahtuma sekä lasku tehdään <a href='blarnaoy.com'>
+  Blarna Oy:n</a> kanssa. Lasku lähetetään 2 viikon sisällä toimituksesta
+  sähköpostiisi. Osamaksuun lisätään kuukausittainen 5 euron välityspalkkio.</small>
+
+<!-- Tilauksen lähetys lomakkeella -->
+<form (ngSubmit)='completeOrder(payment.value)'
+  #paymentForm='ngForm' novalidate>
+
+  <!-- Kuukausimaksu -->
+  <div class='radio mt-2'>
+    <label>
+      <input type='radio' value='kuukausittainen' name='payment' ngModel
+        required #payment='ngModel'> Maksan osamaksuna 12kk
+      (<b>{{ calcPriceAndRound(products)}} €</b> / per kk)
+    </label>
+  </div>
+  <!-- Kertamaksu -->
+  <div class='radio'>
+    <label>
+      <input type='radio' value='Kerralla' name='payment' ngModel required
+        #payment='ngModel'> Maksan kaikki kerralla
+      (<b>{{ calcPrice(products) }} €</b>)
+    </label>
+  </div>
+  <hr>
+  <!-- Ehtojen hyväksyminen -->
+  <div class='checkbox mt-1'>
+    <label>
+      <input required ngModel #check='ngModel' name='check' type='checkbox'>
+      Olen lukenut annetut käyttäehdot ja hyväksyn ne
+    </label>
+  </div>
+
+  <!-- Tilauksen lähettäminen -->
+  <button class='btn btn-success mt-2' type='submit'
+    [disabled]='!paymentForm.form.valid || !products || products.length < 1'>
+      Tee tilaus
+  </button>
+
+</form>
+
+<div *ngIf='paymentSuccess' class='alert alert-success mt-3'>
+  {{ paymentSuccess }}
+</div>
+<div *ngIf='paymentFailed' class='alert alert-danger mt-3'>
+  {{ paymentFailed }}
+</div>

@@ -1,0 +1,30 @@
+<div class='row' *ngIf='product'>
+  <div class='col-lg col-md-12 bg-white border'>
+    <img class='img-fluid' [src]='imgurl + product.img' [alt]='product.img'>
+  </div>
+  <div class='col-lg col-md pt-2'>
+    <h4>{{ product.name }}</h4>
+    <p>
+      <small>
+        Tuotekoodi: {{ product.ean }} |
+        Tyyppi: {{ product.type }} |
+        Paino: {{ product.weight }} kg
+      </small>
+    </p>
+    <p>{{ product.desc }}</p>
+    <ul class='nav-link' *ngFor='let bpoint of product.bulletpoints'>
+      <li>{{ bpoint }}</li>
+    </ul> 
+    <h5>Hinta {{ product.price }} € <small>(sis. ALV 24%)</small></h5>
+    <small>Tai {{ product.price / 12 + 5 | number:'1.0-2' }} €/kk (12 kuukautta)</small>
+    <hr>
+    <p>
+      Katso muita tuotteita:
+    <a routerLink='/tuotelaji/{{ product.safetype }}'>
+      {{ product.type }}</a>
+    </p>
+    <button (click)='addToCart(product)' class='btn btn-primary'>
+      Lisää ostokoriin
+    </button>
+  </div>
+</div>

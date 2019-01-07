@@ -1,0 +1,57 @@
+<!-- Angularin kirjaudu sisään - form. Jos kummatkin kentät ovat tyhjiä submittia
+ei voida tehdä. Form -tagissa kerrotaan, että kun submittia painaa, mennään sen
+mukaiseen metodiin. Tehdään myös reference-variable formista, mitä käytetään
+submit -elementissä. Jos form (loginForm) ei ole validi, submittia ei voida painaa. -->
+
+
+<div class='form-group container mb-5'>
+
+  <h3 class='pt-2'>Kirjaudu sisään</h3>
+  <hr>
+
+  <form class='pb-3' (ngSubmit)='login(loginForm.value)' #loginForm='ngForm' novalidate>
+
+    <!-- Käyttäjätunnus -->
+    <div class='form-group'>
+      <label>Sähköposti</label>
+      <input type='text' name='email' class='form-control' ngModel
+        required #email='ngModel'>
+    </div>
+    <small *ngIf='email.dirty && email.invalid'
+        class='alert alert-warning input-group-text'> Sähköposti ei voi olla tyhjä.
+    </small>
+
+    <!-- Salasana -->
+    <div class='form-group'>
+      <label>Salasana</label>
+      <input type='password' name='password' #password='ngModel'
+        class='form-control' ngModel required>
+    </div>
+    <span *ngIf='password.dirty && password.invalid'
+        class='alert alert-warning input-group-text'> Salasana ei voi olla tyhjä.
+    </span>
+
+    <!-- Kirjaudu sisään -nappi. Pysyy käyttämättömänä, kunnes käyttäjä
+      antaa kirjautumistiedot -->
+    <button type='submit' class='btn btn-success'
+      [disabled]='!loginForm.form.valid'>Kirjaudu sisään</button>
+
+  </form>
+
+  <!-- Kirjaudutaan sisään -->
+  <div *ngIf='logInfo' class='alert alert-info'>
+    <i class='fa fa-spinner fa-pulse fa-1.7x fa-fw'></i> {{ logInfo }}
+  </div>
+
+  <!-- Käyttäjä antaa väärät tunnarit -->
+  <div *ngIf='logFailed' class='alert alert-danger'>
+    <i class='fa fa-exclamation-circle'></i> {{ logFailed }}
+  </div>
+
+  <hr>
+
+  <h5 class='pt-3'>Uusi asiakas?
+    <a routerLink='/rekisteroidy'>Rekisteröidy.</a>
+  </h5>
+
+</div>

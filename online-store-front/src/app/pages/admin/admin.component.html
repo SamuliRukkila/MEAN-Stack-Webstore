@@ -1,0 +1,248 @@
+<div class='checkbox ml-4'>
+  <label (click)='changePage()' class='mr-2'>
+    <input type='checkbox' data-toggle='toggle' checked
+      data-onstyle='primary' data-offstyle='danger'
+      data-on='Tuotteet' data-off='Käyttäjät'>
+  </label>
+  <span *ngIf='page === "prod"'><u>Tuotteet</u> / Käyttäjät</span>
+  <span *ngIf='page === "user"'>Tuotteet / <u>Käyttäjät</u></span>
+</div>
+<hr>
+
+<!-- TUOTTEET -->
+<div *ngIf='page === "prod"'>
+
+    <h4 *ngIf='newProduct'>Lisää tuote</h4>
+    <h4 *ngIf='!newProduct'>Päivitä tuote</h4>
+    <hr>
+
+    <!-- Tuotteiden luonti/muokkaus -lomake -->
+    <form (ngSubmit)='productHandler(pForm)' class='pb-3 pt-3' #pForm='ngForm' novalidate>
+
+      <div class='row'>
+        <!-- Tuotteen nimi -->
+        <div class='col-md form-group'>
+          <label>Tuotteen nimi</label>
+          <input type='text' name='name' [(ngModel)]='fProduct.name' class='form-control'
+            required #name='ngModel'>
+        </div>
+        <!-- Tuotteen URL-turvallinen nimi -->
+        <div class='col-md form-group'>
+          <label>URL-nimi</label>
+          <input type='text' name='safename' [(ngModel)]='fProduct.safename' class='form-control'
+             #safename='ngModel' readonly value='{{ convert(fProduct.name) }}'>
+        </div>
+      </div>
+
+
+      <!-- Tuotteen EAN-koodi -->
+      <div class='row'>
+        <div class='col-md form-group'>
+          <label>EAN-koodi
+            <small *ngIf='fProduct.ean'>({{ fProduct.ean.length }} / 13)</small>
+          </label>
+          <input type='text' name='ean' class='form-control' minlength='13' maxlength='13' #ean='ngModel'
+            required [(ngModel)]='fProduct.ean' value='{{fProduct.ean | uppercase}}'
+            placeholder='Esim. OW92U4ISJ293E' [disabled]='!newProduct'
+            pattern='([a-zA-Z0-9]+)'>
+        </div>
+        <!-- Tuotteen hinta -->
+        <div class='col-md-3'>
+          <label>Hinta</label>
+          <div class='form-group input-group'>
+            <input type='number' name='price' class='form-control' placeholder='Esim 89.99'
+              #price='ngModel' required [(ngModel)]='fProduct.price'>
+            <div class="input-group-prepend">
+              <div class="input-group-text">€</div>
+            </div>
+          </div>
+        </div>
+        <!-- Tuotteen paino -->
+        <div class='col-md-3'>
+          <label>Paino</label>
+          <div class='form-group input-group'>
+            <input type='number' name='weight' class='form-control' placeholder='Esim. 6.39'
+              #weight='ngModel' required [(ngModel)]='fProduct.weight'>
+              <div class="input-group-prepend">
+                <div class="input-group-text">kg</div>
+            </div>
+          </div>
+        </div>
+        <!-- Tuotelaji -->
+        <div class='col-md'>
+          <div class='form-group'>
+            <label>Tuotelaji</label>
+            <select class='form-control' name='type' #type='ngModel'
+              required [(ngModel)]='fProduct.type'>
+                <option selected>Valitse tuotelaji</option>
+              <option *ngFor='let type of productTypes'>{{ type.type }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tuotteen pitkä kuvailu -->
+      <div class='row'>
+        <div class='form-group col-md-7'>
+          <label>Tuotteen kuvailu
+            <small *ngIf='fProduct.desc'>
+              ({{ fProduct.desc.length }} / 100-400 sanaa)
+            </small>
+          </label>
+          <textarea class='form-control' required rows='8' name='desc' minlength='100'
+            maxlength='400' style='resize:none' #desc='ngModel' [(ngModel)]='fProduct.desc'>
+          </textarea>
+        </div>
+        <!-- 4 avainlausetta tuotteesta -->
+        <div class='form-group col-md'>
+          <label>4 pääkohtaa tuotteesta</label>
+          <div class='form-group'>
+            <input type='text' name='bpoint0' class='form-control'
+              #bpoint0='ngModel' required [(ngModel)]='fProduct.bpoint0'>
+          </div>
+          <div class='form-group'>
+            <input type='text' name='bpoint1' class='form-control'
+              #bpoint1='ngModel' required [(ngModel)]='fProduct.bpoint1'>
+          </div>
+          <div class='form-group'>
+            <input type='text' name='bpoint2' class='form-control'
+              #bpoint2='ngModel' required [(ngModel)]='fProduct.bpoint2'>
+          </div>
+          <div class='form-group'>
+            <input type='text' name='bpoint3' class='form-control'
+              #bpoint3='ngModel' required [(ngModel)]='fProduct.bpoint3'>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tuotteen kuvan lisääminen -->
+      <div class='form-group' *ngIf='newProduct'>
+        <label>Lisää kuva tuotteelle
+          <small>(Kuvan nimellä ei ole väliä. Yleisimmät kuvaformaatit toimivat.)</small>
+        </label>
+          <div class='custom-file'>
+            <input type='file' class='custom-file-input' id='image' name='pForm.image'
+              (change)='onfileSelected($event)'>
+            <label class='custom-file-label' for='image'>
+              <span *ngIf='!imgSelected'>Lataa kuva</span>
+            <span *ngIf='imgSelected'>{{ imgSelected }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Kuva uudelle tuotteelle -->
+      <button *ngIf='newProduct' type='submit'
+      [disabled]='!imgSelected || !pForm.form.valid' class='btn btn-primary'>
+          Lisää tuote
+      </button>
+
+      <!-- Ei kuvanmuokkausta tuotteen päivittämisessä -->
+      <p *ngIf='!newProduct'>(Päivitettävän tuotteen kuvaa ei voida vaihtaa
+        sivulta käsin. Pyydä palvelimen tukihenkilöä tähän hommaan.)</p>
+
+      <!-- Päivitettävän tuotteen lähetys/peruutus -->
+      <span *ngIf='!newProduct'>
+        <button type='submit' class='btn btn-primary mr-2'
+          [disabled]='pForm.form.invalid && pForm.form.pristine'>
+          Päivitä tuote
+        </button>
+        <button type='button' (click)='changeProductAttribute(); pForm.reset();
+          getAllProducts();' class='btn btn-danger'> Peruuta päivitys
+        </button>
+      </span>
+
+    </form>
+
+    <!-- Tuotteen lisäys onnistui/epäonnistui -->
+    <div class='pt-1 mt-2 mb-2'>
+      <span *ngIf='productSuccess' class='alert alert-success'>
+        {{ productSuccess }}
+      </span>
+      <span *ngIf='productFailed' class='alert alert-danger'>
+        {{ productFailed }}
+      </span>
+    </div>
+
+
+
+    <!-- Kaikki tuotteet -->
+    <h4 class='mt-3'>Kaikki tuotteet</h4>
+    <hr>
+
+    <div *ngFor='let p of products' class='border p-3 mt-3'>
+      <img [src]='imageurl+p.img' [alt]='p.img' height='45px' width='45px'>
+      <div class='row'>
+        <div class='col-md-4'>
+          <b>EAN: </b> {{ p.ean }}
+        </div>
+        <div class='col-md-3'>
+          <b>Nimi: </b> {{ p.name }}
+        </div>
+        <div class='col-md-4'>
+          <b>URL-nimi: </b> {{ p.safename }}
+        </div>
+        <div class='col-md-4'>
+          <b>Tuotelaji: </b> {{ p.type }}
+        </div>
+        <div class='col-md-3'>
+          <b>Hinta: </b> {{ p.price }} €
+        </div>
+        <div class='col-md-3'>
+          <b>Paino: </b> {{ p.weight }} kg
+        </div>
+        <div class='col-md-2'>
+          <button type='button' class='btn btn-danger px-1 py-0'
+             mwlConfirmationPopover (confirm)='deleteProd(p.ean, p.img)'
+            popoverTitle='Oletko varma' popoverMessage='Tämä poistaa tuotteen
+            pysyvästi.' placement='top' confirmText='Kyllä' cancelText='En'>
+            <i class='fa fa-trash'></i>
+          </button>
+          <button type='button' class='btn btn-primary px-1 py-0 ml-1'
+            (click)='updateProd(p)'><i class='fa fa-edit'></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+</div>
+
+
+
+
+
+<div *ngIf='page === "user"'>
+
+    <h4 class='mt-3'>Kaikki käyttäjät</h4>
+    <p>(Käyttäjiä yhteensä {{ users.length }} kpl)</p>
+    <p class='bg-success rounded p-2 text-light w-50'><small>Turvallisuuden vuoksi pahasti käyttäytyviä käyttäjiä ei voida
+      poistaa graafisen käyttöliittymän avulla. Ota yhteyttä palvelinpuolen
+      henkilökuntaan, jos poistolle on tarvetta.</small></p>
+
+    <div *ngFor='let u of users' class='border p-3 mt-3'>
+      <div class='row'>
+        <div class='col-md-4'>
+          <b>Nimi </b> {{ u.firstname }} {{ u.surname }}
+        </div>
+        <div class='col-md-4'>
+          <b>Email: </b> {{ u.email }}
+        </div>
+        <div class='col-md-4'>
+          <b>Lähiosoite: </b> {{ u.address }}
+        </div>
+        <div class='col-md-4'>
+          <b>Paikkakunta: </b> {{ u.postnumber }}, {{ u.city}}
+        </div>
+        <div class='col-md-4'>
+          <b>Uutiskirjelähetys: </b>
+            <span *ngIf='u.send_email'>Kyllä</span>
+            <span *ngIf='!u.send_email'>Ei</span>
+        </div>
+        <div class='col-md-4'>
+          <b>Järjestelmänvalvoja: </b>
+            <span *ngIf='u.isadmin'>Kyllä</span>
+            <span *ngIf='!u.isadmin'>Ei</span>
+        </div>
+      </div>
+    </div>
+
+</div>
