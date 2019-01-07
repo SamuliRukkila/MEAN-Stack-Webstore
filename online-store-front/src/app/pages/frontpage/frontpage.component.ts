@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { environment } from '../../../environments/environment.prod';
 
 import { ProductService } from '../../services/product.service';
 import { ProductCartService } from '../../services/product-cart.service';
@@ -14,7 +15,7 @@ import { ProductCart } from '../../dataclasses/ProductCart';
 export class FrontpageComponent implements OnInit {
 
   // Root-url kuville
-  public imageurl = 'http://localhost:3000/images/';
+  public imageurl = environment.imageurl;
   // Kaikki tuotteet
   public products: Product[];
 

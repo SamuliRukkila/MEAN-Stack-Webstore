@@ -1,7 +1,13 @@
+/* Tuotekori-service, joka hoitaa kaikki tuotekoriin liittyvät palvelut. Tuote-
+kori ei ole yhteydessä verkkoon eli sen ei tarvitse lähettää HTTP-kutsuja
+minnekään. Tuotekori-servicessä voit laskea ostoskorin tuotemäärän, poistaa
+tuotteita ostoskorista, lisätä tuotteita tai vaikkapa laskea hinnan. Tuotekori
+määräytyy jokaiselle käyttäjälle itsenäisesti. */
+
 import { Injectable } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 
-import { ProductCart } from '../dataclasses/ProductCart';
+import {  ProductCart } from '../dataclasses/ProductCart';
 
 @Injectable({
   providedIn: 'root'
@@ -13,9 +19,24 @@ export class ProductCartService {
   // Subject-oliollinen muuttuja, jota muut komponentit tilaavat
   public productCart = new Subject<ProductCart[]>();
 
+  // Palauttaa tuotekori-muuttujan Observablena sitä tilaaville
+  returnProductCart(): Observable<ProductCart[]> {
+    return this.productCart.asObservable();
+  }
+
+  // Tyhjentää ostoskorin kokonaan
+  emptyProductCart(): void {
+    sessionStorage.setItem('products', '[]');
+    this.productCart.next();
+  }
+
 
   /*
-    POISTA TUOTE TUOTEKORISTA
+   POISTA TUOTE TUOTEKORISTA
+    Funktio, joka poistaa yksittäisen tuotteen tuotekorista. Funktio käy
+    loopissa kaikki tuotekorin tuotteet läpi ja jos se löytää EAN-arvoisen
+    parin, poistetaan se arvo tuotekorista. Tuotekorin Subject-olio päivitetään
+    myös samalla, jotta muokkaus näkyy automaattisesti käyttäjälle ilman päivitystä.
   */
   removeFromBasket(ean: string) {
     const products = JSON.parse(sessionStorage.getItem('products'));
@@ -31,7 +52,12 @@ export class ProductCartService {
 
 
   /*
-    LASKE TUOTEKORIN KOKONAISHINTA
+   LASKE TUOTEKORIN KOKONAISHINTA
+    Laskee tuotekorin kaikkien tuotteiden yhteishinnan ja palauttaa sen. Funktio
+    käy for-loopissa kaikki tuotteet läpi ja plussaa ne paikalliseen muuttujaan.
+    Jokainen tuote kerrotaan sen mukaisella määrällä, mitä niitä on valittu.
+    Numero palautetaan 2 desimaalin tarkkuudella. Jos tuotteita ei löydy
+    palautetaan automaattisesti 0.
   */
   calcPrice(products: ProductCart[]): number {
     let num = 0;
@@ -44,7 +70,11 @@ export class ProductCartService {
 
 
   /*
-    LASKE TUOTEKORIN TUOTEMÄÄRÄ
+   LASKE TUOTEKORIN TUOTEMÄÄRÄ
+    Laskee montako tuotetta tuotekorissa on. Funktio käy for-loopissa läpi kaikki
+    tuotekorin tuotteet ja ottaa tuotteilta 'amount' -attribuutin numeron vastaan,
+    joka lisätään paikalliseen muuttujaan. Jos tuotteita ei löydy palautetaan
+    automaattisesti 0.
   */
   countProducts(products: ProductCart[]): number {
     let num = 0;
@@ -57,7 +87,11 @@ export class ProductCartService {
 
 
   /*
-    LISÄÄ TUOTE OSTOSKORIIN
+   LISÄÄ TUOTE OSTOSKORIIN
+    Lisää uuden tuotteen tuotekoriin. Haetaan aluksi SessionStoragesta tuotekori
+    ja jos tuotekoria ei ole / se on tyhjä, tehdään uusi tuotekori. Jos tuote
+    on jo tuotekorissa lisätään vain sen määrää arvollisesti. Jos tuote on
+    uusi lisätään kokonaan uusi olio taulukkoon joka saa määrän 1.
   */
   addToProductCart(product: ProductCart) {
     let newProduct = true;
@@ -81,16 +115,4 @@ export class ProductCartService {
     sessionStorage.setItem('products', JSON.stringify(cart));
     this.productCart.next(cart);
   }
-
-  // Palauttaa tuotekori-muuttujan Observablena sitä tilaaville
-  returnProductCart(): Observable<ProductCart[]> {
-    return this.productCart.asObservable();
-  }
-
-  // Tyhjentää ostoskorin kokonaan
-  emptyProductCart(): void {
-    sessionStorage.setItem('products', '[]');
-    this.productCart.next();
-  }
-
 }

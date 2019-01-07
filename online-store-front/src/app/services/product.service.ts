@@ -1,7 +1,12 @@
+/* Tuotteisiin liittyvät servicet. Täältä voit tehdä kaikki CRUD-ominaisuudet
+liittyen tuotteisiin. Moneen tuotteen muokkaukseen tarvit ADMIN-autentikaation.
+Normaaleihin tuotteiden hakuihin et tarvitse mitään autentikaatiota. */
+
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../environments/environment.prod';
 
 import { Product } from '../dataclasses/Product';
 
@@ -21,7 +26,7 @@ export class ProductService {
   }
 
   // Root-url HTTP-kutsuille
-  public url = 'http://localhost:3000/product/';
+  public url = environment.url + 'product/';
   // Autentikaatio-token
   public token: string;
 
@@ -39,7 +44,7 @@ export class ProductService {
     HAKEE KAIKKI TUOTTEET
   */
   getProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(this.url + 'allproducts', headers)
+    return this.http.get<Product[]>(this.url + 'allproducts')
       .pipe(
         catchError(err => throwError(err.error)
     ));

@@ -90,12 +90,6 @@ footer p {
 .foote_bottom_ul_amrc li {
   display: inline;
 }
-@media only screen and (max-width: 522px) {
-  .foote_bottom_ul_amrc li {
-    display: block;
-    text-align: center;
-  }
-}
 .foote_bottom_ul_amrc li a {
   color: #999;
   margin: 0 12px;
@@ -124,4 +118,21 @@ footer p {
   width: 20px;
   height: 20px;
   text-align: center;
+}
+
+@media only screen and (max-width: 522px) {
+  .foote_bottom_ul_amrc li {
+    display: block;
+    text-align: center;
+  }
+}
+@media only screen and (max-width: 365px) {
+  .social_footer_ul {
+    width: 100%;
+    padding: 0px !important;
+    a {
+      margin: initial 0px;
+      padding: initial 0px;
+    }
+  }
 }

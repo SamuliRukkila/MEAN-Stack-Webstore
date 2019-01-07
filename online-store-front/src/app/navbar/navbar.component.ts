@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { environment } from '../../environments/environment.prod';
 
 import { AuthService } from '../services/auth.service';
 import { ProductService } from '../services/product.service';
@@ -18,11 +19,11 @@ import { ProductCart } from '../dataclasses/ProductCart';
 export class NavbarComponent implements OnInit {
 
   // Root-osoite kuville
-  public imageurl = 'http://localhost:3000/images/';
+  public imageurl = environment.imageurl;
 
-  public admin = false;
-  // Sisältää käyttäjän nimen jos kirjautnut sisään
+  // Käyttäjän nimi | Onko admin
   public login: string;
+  public admin = false;
 
   // Tuotelajt | Tuotekori
   public productTypes: Object[];
@@ -32,12 +33,12 @@ export class NavbarComponent implements OnInit {
   public products$: Observable<Product[]>;
   private searchTerms = new Subject<string>();
 
-
   constructor (
     private authService: AuthService,
     private productService: ProductService,
     private productCartService: ProductCartService
   ) {}
+
 
   ngOnInit() {
     this.checkLoginState();
@@ -58,14 +59,14 @@ export class NavbarComponent implements OnInit {
     );
   }
 
-  // Laskee ostoskorissa olevien tuotteiden yhteishinnan
+
+  // Laskee ostoskorissa olevien tuotteiden yhteishinnan / yhteismäärän
   calcPrice(products: ProductCart[]): number {
     return this.productCartService.calcPrice(products);
-  }
-  // Laskee ostokorissa olevien tuotteiden määrän
-  countProducts(products: ProductCart[]): number {
+  } countProducts(products: ProductCart[]): number {
     return this.productCartService.countProducts(products);
   }
+
 
   // Hakulauseessa olevan Subject-olion käytänne, jossa uusi hakusana tuotteille
   // tulee vanhan hakusanan tilalle
@@ -75,9 +76,11 @@ export class NavbarComponent implements OnInit {
 
 
   /*
-    HAKEE TUOTEKORIN
-    -  Servicestä jos sivua ei ole päivitetty (F5)
-    -  SessionStoragesta jos sivu on päivitetty eikä tieto ole servicessä
+   HAKEE TUOTEKORIN
+    Funktio, joka hakee tuotekorin, tilaamalla ProducCartServicen Observablen.
+    Joka kerta kun tuotekoriin lisätään jotain, päivittyy siitä tieto
+    automaattisesti myös tähän funktioon. Varmistuskeinona tieto voidaan myös
+    hakea SessionStoragesta.
   */
   getProductCart(): void {
     this.productCartService.productCart
@@ -91,9 +94,11 @@ export class NavbarComponent implements OnInit {
 
 
   /*
-    HAKEE TIEDON ONKO KÄYTTÄJÄ KIRJAUTUNUT SISÄÄN
-    -  Servicestä jos sivua ei ole päivitetty (F5)
-    -  SessionStoragesta jos sivu on päivitetty eikä tieto ole servicessä
+   HAKEE TIEDON ONKO KÄYTTÄJÄ KIRJAUTUNUT SISÄÄN
+    Funktio, joka hakee tiedon käyttäjän kirjautumisesta tilaamalla AuthServicen
+    Observablen. Joka kerta kun käyttäjä kirjautuu sisään tai ulos, tämä
+    funktio saa uuden arvon. Varmistuskeinona tieto voidaan myös hakea
+    SessionStoragesta.
   */
   checkLoginState(): void {
     this.authService.returnLoginCond()
@@ -105,6 +110,13 @@ export class NavbarComponent implements OnInit {
   }
 
 
+  /*
+   HAKEE TIEDON ONKO KÄYTTÄJÄ ADMIN
+    Funktio, joka hakee tiedon adminin kirjautumisesta tilaamalla AuthServicen
+    Observablen. Joka kerta kun ADMIN-käyttäjä kirjautuu sisään tai ulos, tämä
+    funktio saa uuden arvon. Varmistuskeinona tieto voidaan myös hakea
+    AuthServicen funktiosta, joka tarkastaan tokenin.
+  */
   checkAdminState(): void {
     this.authService.returnAdminCond()
       .subscribe(cond => this.admin = cond);
@@ -115,23 +127,33 @@ export class NavbarComponent implements OnInit {
 
 
   /*
-    POISTAA TUOTTEEN OSTOSKORISTA
+   HAKEE KAIKKI TUOTELAJIT
+    Funktio, joka hakee komponentin luonnin aikana kaikki tuotetyypit servicen
+    avulla. Jos tuotelajien haussa tulee virhe, console.logataan virhe.
+  */
+  getProductTypes(): void {
+    this.productService.getProductTypes()
+    .subscribe(type => this.productTypes = type),
+    err => console.error(err);
+  }
+
+
+  /*
+   POISTAA TUOTTEEN OSTOSKORISTA
+    Toimii väli-funktiona asiakaspuolen ja servicen välillä. Kun käyttäjä
+    klikkaa tuotekorin tuotteen-poistoa. Tämä ohjaa kutsun ProducCartServiceen.
   */
   removeFromBasket(ean: string): void {
     this.productCartService.removeFromBasket(ean);
   }
 
-  /*
-    HAKEE KAIKKI TUOTELAJIT
-  */
-  getProductTypes(): void {
-    this.productService.getProductTypes()
-      .subscribe(type => this.productTypes = type),
-        err => console.error(err);
-  }
 
   /*
-    KIRJAA KÄYTTÄJÄN SISÄÄN
+   KIRJAA KÄYTTÄJÄN ULOS
+    Kun käyttäjä painaa 'Kirjaudu ulos' -nappia tämä funktio laittaa aluksi
+    paikallisen muuttujan tyhjäksi. Sen jälkeen se kutsuu AuthServicin omaa
+    uloskirjautumis-funktiota. Lopuksi poistetaan SessionStoragesta
+    'credentials' -autentikaatioarvo. Näin saadaan valmis uloskirjautuminen.
   */
   logout() {
     this.login = null;

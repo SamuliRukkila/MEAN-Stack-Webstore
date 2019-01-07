@@ -1,3 +1,7 @@
+<!-- Käyttäjän rekisteröintikomponentti. Tämän avulla jokainen käyttäjä voi
+rekisteröityä webbiapplikaatioon. Jokainen tieto validoidaan täällä, joka tehdään
+uudelleen vielä palvelinpuolella. Teema on tehty Bootstrapilla. -->
+
 <p class='alert alert-danger'>Kyseessä on ammattikorkeakoulun lopputyö. Sivusto
 EI ole oikea verkkokauppa. Älä anna oikeita tietojasi, koska ne säilytetään verkossa
 olevassa tietokannassa eikä tietojen täydellistä turvallisuutta voida varmistaa.
@@ -14,25 +18,30 @@ Tietojasi ei varmenneta, joten niiden ei tarvitse olla oikeita.</p>
   <form (ngSubmit)='register(regForm.value)' class='pb-3 pt-3'
     #regForm='ngForm' novalidate>
 
+
     <!-- Etunimi -->
     <div class='form-group'>
       <label>Etunimi</label>
       <input type='text' name='firstname' class='form-control'
-        ngModel required #firstname='ngModel'>
+        ngModel required #firstname='ngModel' pattern='([-a-öA-Ö]+)'>
     </div>
-    <small *ngIf='firstname.touched && regForm.form.hasError("required", "firstname")'
-        class='alert alert-warning input-group-text'> Etunimi ei voi olla tyhjä.
+    <small *ngIf='firstname.touched && firstname.invalid'
+        class='alert alert-warning input-group-text'> Etunimi on tyhjä tai siinä on virhe.
+          Älä käytä erikoismerkkejä (pl. "-").
     </small>
+
 
     <!-- Sukunimi -->
     <div class='form-group'>
       <label>Sukunimi</label>
       <input type='text' name='surname' class='form-control'
-        ngModel required #surname='ngModel'>
+        ngModel required #surname='ngModel' pattern='([-a-öA-Ö]+)'>
     </div>
-    <small *ngIf='surname.touched && regForm.form.hasError("required", "surname")'
-        class='alert alert-warning input-group-text'> Sukunimi ei voi olla tyhjä.
+    <small *ngIf='surname.touched && surname.invalid'
+        class='alert alert-warning input-group-text'> Sukunimi on tyhjä tai
+          siinä on virhe. Älä käytä erikoismerkkejä (pl. "-").
     </small>
+
 
     <!-- Sähköposti -->
     <div class='form-group'>
@@ -40,35 +49,38 @@ Tietojasi ei varmenneta, joten niiden ei tarvitse olla oikeita.</p>
       <input type='email' name='email' class='form-control'
         ngModel required #email='ngModel' pattern='^([a-zA-Z0-9])(([\-.]|[_]+)?([a-zA-Z0-9]+))*(@){1}[a-z0-9]+[.]{1}(([a-z]{2,3})|([a-z]{2,3}[.]{1}[a-z]{2,3}))'>
     </div>
-    <small *ngIf='email.touched && regForm.form.hasError("required", "email")'
-        class='alert alert-warning input-group-text'> Sähköposti ei voi olla tyhjä.
+    <small *ngIf='email.touched && email.invalid'
+        class='alert alert-warning input-group-text'> Sähköposti on tyhjä tai se
+          on väärin kirjoitettu.
     </small>
-    <small *ngIf='email.invalid && email.dirty && email.touched'
-      class='alert alert-warning input-group-text'> Sähköposti on väärin kirjoitettu.
-    </small>
+
 
     <!-- Lähiosoite -->
     <div class='form-row'>
       <div class='form-group col-md-6'>
         <label>Lähiosoite</label>
         <input type='text' name='address' class='form-control'
-          ngModel required #address='ngModel'>
+          ngModel required #address='ngModel' pattern='([-a-öA-Ö0-9 ]+)'>
       </div>
+
 
       <!-- Postinumero -->
       <div class='form-group col-md-2'>
         <label>Postinumero</label>
         <input type='text' name='postnumber' class='form-control'
-          ngModel required #postnumber='ngModel' pattern='[0-9]{5}$'>
+          ngModel required maxlength='5' minlength='5' #postnumber='ngModel'
+            pattern='[0-9]{5}$'>
       </div>
+
 
       <!-- Postitoimipaikka -->
       <div class='form-group col-md-4'>
         <label>Postitoimipaikka</label>
         <input type='text' name='city' class='form-control'
-          ngModel required #city='ngModel'>
+          ngModel required #city='ngModel' pattern='([-a-öA-Ö]+)'>
       </div>
     </div>
+
 
     <!-- Osoitetietojen virhekäsittely -->
 
@@ -89,17 +101,19 @@ Tietojasi ei varmenneta, joten niiden ei tarvitse olla oikeita.</p>
         class='alert alert-warning input-group-text'> Postitoimipaikka ei voi olla tyhjä.
     </small>
 
+
     <!-- Salasana -->
     <div class='form-group'>
       <label>Salasana</label>
       <small><p>Salasanan pitää sisältää vähintään 8 merkkiä, yhden numeron sekä
          yhden ison ja pienen kirjaimen.</p></small>
-      <input type='password' name='password' class='form-control' minlength=8
+      <input type='password' name='password' class='form-control' minlength='8' maxlength='30'
         ngModel required #password='ngModel' pattern='((?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,30})'>
     </div>
     <small *ngIf='password.touched && regForm.form.hasError("required", "password")'
         class='alert alert-warning input-group-text'> Salasana ei voi olla tyhjä.
     </small>
+
 
     <!-- Uutiskirje -->
     <div class='form-group'>
@@ -111,12 +125,16 @@ Tietojasi ei varmenneta, joten niiden ei tarvitse olla oikeita.</p>
       </div>
     </div>
 
+
     <!-- Lähetä -painike, jota ei voida painaa jossei formi ole kunnossa -->
     <button type='submit' class='btn btn-success'
       [disabled]='!regForm.form.valid'>Rekisteröidy
     </button>
 
+
   </form>
+
+
 
   <!-- Jos rekisteröityminen onnistuu -->
   <div *ngIf='regSuccess' class='alert alert-success'>

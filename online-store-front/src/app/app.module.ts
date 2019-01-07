@@ -19,6 +19,8 @@ import { AdminComponent } from './pages/admin/admin.component';
 import { PaymentComponent } from './pages/payment/payment.component';
 import { PagenotfoundComponent } from './pages/pagenotfound/pagenotfound.component';
 
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -32,7 +34,7 @@ import { PagenotfoundComponent } from './pages/pagenotfound/pagenotfound.compone
     ProductTypesComponent,
     AdminComponent,
     PaymentComponent,
-    PagenotfoundComponent
+    PagenotfoundComponent,
   ],
   imports: [
     BrowserModule,

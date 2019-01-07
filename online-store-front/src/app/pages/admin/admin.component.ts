@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { environment } from '../../../environments/environment.prod';
 
 import { ProductService } from '../../services/product.service';
 import { UserService } from '../../services/user.service';
@@ -36,7 +37,7 @@ export class AdminComponent implements OnInit {
   public imgSelected: string;
 
   // Kuvien root-osoite
-  public imageurl = 'http://localhost:3000/images/';
+  public imageurl = environment.imageurl;
 
   // Tuotteen lisäys onnistui/epäonnistui
   public productSuccess: string;

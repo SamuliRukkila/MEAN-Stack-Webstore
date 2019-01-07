@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment.prod';
 
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
@@ -14,7 +15,7 @@ import { User } from '../../dataclasses/User';
 export class ProfileComponent implements OnInit {
 
   // Root-osoite kuville
-  public imageurl = 'http://localhost:3000/images/';
+  public imageurl = environment.imageurl;
 
   // Käyttäjän tietojen haku epäonnistui
   public getUserInfoFailed: string;

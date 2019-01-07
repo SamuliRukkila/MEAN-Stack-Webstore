@@ -1,13 +1,20 @@
+/* Servicet autentikaatioon liittyvissä tapahtumissa. Täältä voit kirjautua sisään
+sekä rekisteröityä palveluun. Admin-käyttäjäksi et voi rekisteröityä suoraan sivun
+kautta vaan se pitää tehdä manuaalisesti palvelimen kautta tietoturvasyistä. */
+
 import { Injectable } from '@angular/core';
 import { Observable, Subject, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { environment } from '../../environments/environment.prod';
 
 import { Register } from '../dataclasses/Register';
 
-
-const headers = { headers: new HttpHeaders({ 'Content-Type': 'application/json' })};
+// HTTP-kutsujen header - data lähetetään JSON tietona
+const headers = { headers: new HttpHeaders({
+  'Content-Type': 'application/json'
+})};
 
 @Injectable({
   providedIn: 'root'
@@ -18,34 +25,44 @@ export class AuthService {
 
   // Sisältää url-osoitteen johon navigoidaan kun autentikaatio on hoidossa
   public redirectUrl: string;
-
   // Root-osoite HTTP-kyselyille
-  private url = 'http://localhost:3000/';
-  // Tieto kirjautumisesta välitetään komponenteille Subject-olion avulla
+  private url = environment.url + 'auth/';
+
+  // Tieto (admin/)kirjautumisesta joka välitetään loppujen lopuksi sitä
+  // tilaaville komponenteille Subject-olion avulla
   public logincond = new Subject<string>();
   public admincond = new Subject<boolean>();
-  // Tokenin dekoodaus
+
+  // Paikallinen muuttuja Javascript Web Token -helperistä
   private jwtHelp = new JwtHelperService();
 
-
-  // Tätä metodia kutsutaan kun käyttäjä on onnistuneesti kirjautunut sisään.
-  // Se välittää uusimman tiedon paikalliseen muuttujaan kirjautumisesta.
+  /*
+   INFORMOI TILAAJIA UUDESTA ARVOSTA KIRJAUTUMISTILANTEESTA
+    Näitä funktioita kutsutaan kun käyttäjän kirjautumistilanne muuttuu.
+  */
   sendLoginInfo(firstname: string): void {
     this.logincond.next(firstname);
-  }
-  sendAdminInfo(isadmin: boolean): void {
+  } sendAdminInfo(isadmin: boolean): void {
     this.admincond.next(isadmin);
   }
 
-  // Tämä palauttaa login-tiedon Observablena sitä tilaaville
+
+  /*
+   PALAUTTAA (ADMIN)KIRJAUTUMISTILANTEEN
+    Palauttaa muutoksissa funktioiden tilaajille kirjautumistilanteen muutoksen.
+  */
   returnLoginCond(): Observable<string> {
     return this.logincond.asObservable();
-  }
-  returnAdminCond(): Observable<boolean> {
+  } returnAdminCond(): Observable<boolean> {
     return this.admincond.asObservable();
   }
 
-  // Uloskirjautuminen => vaihtaa logincond -muuttujan nulliksi
+
+  /*
+   ULOSKIRJAUTUMINEN
+    Vaihtaa logincond -muuttujan tyhjäksi muuttujaksi, eli toisinsanoen
+    kirjaa käyttäjän ulos.
+  */
   logOut(): void {
     this.logincond.next();
     this.admincond.next();
@@ -53,12 +70,9 @@ export class AuthService {
 
 
   /*
-   * KÄYTTÄJÄN REKISTERÖIMINEN
-   *
-   * Rekisteröi käyttäjän. Virheen sattuessa palauttaa
-   * virheen vastauksen sijaan
-   *
-   */
+   KÄYTTÄJÄN REKISTERÖINTI
+    Rekisteröi käyttäjän. Virheen sattuessa palauttaa virheen vastauksen sijaan.
+  */
   register(data: Register): Observable<any> {
     return this.http.post(this.url + 'register', data, headers)
       .pipe(
@@ -68,8 +82,7 @@ export class AuthService {
 
 
   /*
-    KÄYTTÄJÄN KIRJAUTUMINEN
-
+   KÄYTTÄJÄN KIRJAUTUMINEN
     Kirjaa käyttäjän. Katsoo, että backend palauttaa tokenin. Jos kirjautumis-
     tunnukset ovat oikein, tallennetaan käyttäjän sessiostorageen etunimi,
     sähköposti sekä token. Tämän tokenin avulla käyttäjä voi päästä sivuille,
@@ -104,13 +117,23 @@ export class AuthService {
   }
 
 
-  // Normaalin käyttäjän autentikaatiovarmennus. Jos käyttäjällä on token,
-  // katsotaan onko se vanhentunut. Palautetaan true jos ei.
+  /*
+   NORMAALIN KÄYTTÄJÄN AUTENTIKAATIO
+    Normaalin käyttäjän autentikaatiovarmennus. Jos käyttäjällä on token,
+    katsotaan onko se vanhentunut. Palautetaan true jos ei.
+  */
   isAuthenticated(): boolean {
     const session = JSON.parse(sessionStorage.getItem('credentials'));
     return !this.jwtHelp.isTokenExpired(session.token);
   }
 
+
+  /*
+   ADMIN-KÄYTTÄJÄN AUTENTIKAATIO
+    Admin-käyttäjän autentikaatio, käyttäjän sessionstoragessa oleva token
+    "avataan" ja sieltä otetaan payloadi muuttujaan. Jos payloadin sisällä
+    oleva arvo "isadmin" on true, hyväksytään käyttäjä admin-käyttäjäksi
+  */
   isAdminAuthenticated(): boolean {
     const session = JSON.parse(sessionStorage.getItem('credentials'));
     if (session) {

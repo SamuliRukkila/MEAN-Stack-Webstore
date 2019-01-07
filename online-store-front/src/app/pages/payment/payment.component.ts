@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment.prod';
 
 import { ProductCartService } from '../../services/product-cart.service';
 import { UserService } from '../../services/user.service';
@@ -19,7 +20,7 @@ export class PaymentComponent implements OnInit {
   public userinfo: User;
 
   // Root-url kuville
-  public imageurl = 'http://localhost:3000/images/';
+  public imageurl = environment.imageurl;
 
   // Tilaus onnistui/epäonnistui
   public paymentSuccess: string;

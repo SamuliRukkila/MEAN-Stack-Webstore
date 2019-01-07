@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment.prod';
 
 import { ProductService } from '../../services/product.service';
 import { ProductCartService } from '../../services/product-cart.service';
@@ -21,7 +22,7 @@ export class ProductDetailComponent implements OnInit {
   productSubscription: Subscription;
 
   // Root-osoite kuville
-  public imgurl = 'http://localhost:3000/images/';
+  public imgurl = environment.imageurl;
   // Tuotteen tiedot
   public product: Product;
 

@@ -1,5 +1,18 @@
-// Guard -moduuli, joka suojaa List-komponenttia, ellet ole kirjautunut sisään.
-// Keskustelee pääasiassa Router-moduulin sekä Auth -servicen kanssa.
+/*
+
+Angularin Auth-Guard moduuli, joka suojelee turvattuja sivuja. Ko. moduuli
+tuodaan routingiin mukaan, jossa tietyissä valituissa osoitteissa tarkastetaan
+aluksi käyttäjän autentikaatio ennenkuin heidät päästetään sivulle.
+
+Käyttäjät voivat joko olla normaaleja käyttäjiä, jotka pystyvät katsomaan
+tietojaan, kirjautumaan tai tekemään normaaleja asioita web-sovelluksessa.
+
+Admin-käyttäjät pystyvät näkemään jokaisen käyttäjän, sekä muokkaamaan CRUD
+-toiminnoilla tietokantaa.
+
+Käyttäjien välillä kutsututaan omia metodeja.
+
+*/
 
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot,
@@ -18,18 +31,29 @@ export class AuthGuard implements CanActivate {
     private router: Router
   ) {}
 
-  // Tämä metodi suoritetaan kun koitetaan päästä 'Add' -sivulle. Palauttaa
-  // true/false.
+
+  // Auth-guardin oma funktio, joka aktivoituu kun käyttäjä koittaa päästä
+  // suojattuun sivustoon.
   canActivate (
     _next: ActivatedRouteSnapshot, _state: RouterStateSnapshot): boolean {
       // Tallennetaan muuttujaan URL-sivu, johon koitettiin päästä
       const url: string = _state.url;
+      // Jos käyttäjä koittaa päästä admin-sivulle tehdään admin-autentikaatio
       if (url === '/admin') {
         return this.checkAdminLogin(url);
       }
+      // Normaalin käyttäjän autentikaatio
       return this.checkLogin(url);
   }
 
+
+  /*
+   VARMISTAA ADMIN-KÄYTTÄJÄN AUTENTIKAATION
+    Funktio, joka tarkastaa onko admin-sivulle pyrkivä henkilö admin. Jos
+    sessionStorage sisältää arvoparin Credentials kokeillaan toista ehtolauseketta,
+    jota kutsutaan AuthServicestä. Jos tämä funktio palauttaa truen, palautetaan
+    true routerille, joka päästää käyttäjän admin-sivustoon.
+  */
   checkAdminLogin(url: string): boolean {
     if (sessionStorage.getItem('credentials') &&
      this.authService.isAdminAuthenticated()) {
@@ -37,13 +61,19 @@ export class AuthGuard implements CanActivate {
        return true;
      }
      console.log('Ei admin-autentikaatiota osoitteeseen: ' + url);
+     // Tässä ei ohjata login-sivulle vaan suoraan etusivulle
      this.router.navigate(['/etusivu']);
      return false;
   }
 
-  // Tämä katsoo auth.servicen muuttujaa (isLoggedIn). Jos muuttuja on false,
-  // viedään käyttäjä kirjautunut sivulle -- muuten käyttäjä voi jatkaa sivulle
-  // normaalisti.
+
+  /*
+   VARMISTAA KÄYTTÄJÄN AUTENTIKAATION
+    Funktio, joka tarkastaa tavallisen käyttäjän autentikaation. Aluksi katsotaan,
+    että sessionStorage sisältää arvoparin Credentials. Jos tämä on true niin
+    kutsutaan AuthServicen autentikaatiofunktiota. Jos kummatkin on tosi,
+    palautetaan true routerille.
+  */
   checkLogin(url: string): boolean {
     if (sessionStorage.getItem('credentials') &&
      this.authService.isAuthenticated()) {

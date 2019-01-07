@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, Subject, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../environments/environment.prod';
 
 import { User } from '../dataclasses/User';
 
@@ -25,7 +26,7 @@ export class UserService {
   private email: string;
 
   // Root-osoite kuville
-  private url: string = 'http://localhost:3000/user/';
+  private url = environment.url + 'user/';
 
 
   /*

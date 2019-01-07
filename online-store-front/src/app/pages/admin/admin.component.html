@@ -23,8 +23,9 @@
         <!-- Tuotteen nimi -->
         <div class='col-md form-group'>
           <label>Tuotteen nimi</label>
-          <input type='text' name='name' [(ngModel)]='fProduct.name' class='form-control'
-            required #name='ngModel'>
+          <input type='text' name='name' [(ngModel)]='fProduct.name'
+            required #name='ngModel' pattern='([-a-öA-Ö0-9 ]+)' minlength='10'
+            maxlength='40' class='form-control'>
         </div>
         <!-- Tuotteen URL-turvallinen nimi -->
         <div class='col-md form-group'>
@@ -98,19 +99,23 @@
           <label>4 pääkohtaa tuotteesta</label>
           <div class='form-group'>
             <input type='text' name='bpoint0' class='form-control'
-              #bpoint0='ngModel' required [(ngModel)]='fProduct.bpoint0'>
+              #bpoint0='ngModel' required [(ngModel)]='fProduct.bpoint0'
+              minlength='10' maxlength='50'>
           </div>
           <div class='form-group'>
             <input type='text' name='bpoint1' class='form-control'
-              #bpoint1='ngModel' required [(ngModel)]='fProduct.bpoint1'>
+              #bpoint1='ngModel' required [(ngModel)]='fProduct.bpoint1'
+              minlength='10' maxlength='50'>
           </div>
           <div class='form-group'>
             <input type='text' name='bpoint2' class='form-control'
-              #bpoint2='ngModel' required [(ngModel)]='fProduct.bpoint2'>
+              #bpoint2='ngModel' required [(ngModel)]='fProduct.bpoint2'
+              minlength='10' maxlength='50'>
           </div>
           <div class='form-group'>
             <input type='text' name='bpoint3' class='form-control'
-              #bpoint3='ngModel' required [(ngModel)]='fProduct.bpoint3'>
+              #bpoint3='ngModel' required [(ngModel)]='fProduct.bpoint3'
+              minlength='10' maxlength='50'>
           </div>
         </div>
       </div>
