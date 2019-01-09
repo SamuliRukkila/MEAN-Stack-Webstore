@@ -12,12 +12,9 @@ mongoose.Promise = global.Promise;
 
 // Luodaan uusi skeema
 const productSchema = new mongoose.Schema({
-  ean: { type: String, required: true, unique: true, maxlength: 13,
-    minlength: 13, match: /[A-Z0-9]+/ },
-  name: { type: String, required: true, unique: true, maxlength: 40,
-    minlength: 10, match: /[-a-öA-Ö0-9 ]+/ },
-  safename: { type: String, required: true, unique: true,
-    match: /[-a-zA-Z0-9]+/ },
+  ean: { type: String, required: true, unique: true, maxlength: 13, minlength: 13, match: /[A-Z0-9]+/ },
+  name: { type: String, required: true, unique: true, maxlength: 40, minlength: 10, match: /[-a-öA-Ö0-9 ]+/ },
+  safename: { type: String, required: true, unique: true, match: /[-a-zA-Z0-9]+/ },
   type: { type: String, required: true, match: /[a-öA-Ö]+/ },
   safetype: { type: String, required: true, match: /[a-zA-Z]+/ },
   desc: { type: String, required: true, minlength: 100, maxlength: 400 },

@@ -13,41 +13,37 @@ import { User } from '../dataclasses/User';
 export class UserService {
 
   constructor(private http: HttpClient) {
-    this.getCredentials();
   }
-
 
   // Rxjs-kirjaston Subject-olio, jolla välitetään tieto kirjautumisesta
   // sen tilaavilla komponenteille
   public logincond = new Subject<string>();
-
-  // Käyttäjän token sekä sähköposti
-  private token: string;
-  private email: string;
 
   // Root-osoite kuville
   private url = environment.url + 'user/';
 
 
   /*
-    HAKEE KIRJAUTUMISEEN LIITTYVÄN DATAN SESSIONSTORAGESTA
+   HAKEE KIRJAUTUMISTIEDOT
+    Funktio hakee kirjautumistiedot (token & email) joka kerta kun komponentti
+    käyttää jotain servicen funktiota. Näitä tietoja käytetään kun service tekee
+    turvattuja HTTP-kyselyitä.
   */
-  getCredentials(): void {
-    const sessValues = sessionStorage.getItem('credentials') ?
+  getCredentials(): {token: string, email: string} {
+    return sessionStorage.getItem('credentials') ?
       JSON.parse(sessionStorage.getItem('credentials')) : {};
-    if (sessValues) {
-      this.token = sessValues.token;
-      this.email = sessValues.email;
-    }
   }
 
 
   /*
-    KAIKKIEN KÄYTTÄJIEN HAKU
+   HAKEE KAIKKI KÄYTTÄJÄT
+    Funktio, joka hakee kaikki käyttäjät tietokannasta (pl. salasana). Ko.
+    funktio tarvitsee Admin-autentikaation.
   */
   getAllUsers(): Observable<User[]> {
+    const sess = this.getCredentials();
     const tokenheaders = { headers: new HttpHeaders({
-        'token': this.token, 'email': this.email
+        'token': sess.token, 'email': sess.email
     })};
     return this.http.get<User[]>(this.url + 'allusers', tokenheaders)
       .pipe(
@@ -57,11 +53,14 @@ export class UserService {
 
 
   /*
-    KIRJAUTUNEEN KÄYTTÄJÄN TIETOJEN HAKU
+   KIRJAUTUNEEN KÄYTTÄJÄN TIETOJEN HAKU
+    Funktio, joka hakee käyttäjät omat tiedot. Käyttäjän pitää olla kirjautunut
+    sisään, jotta hän voi hakea tietoa itsestään.
   */
   getUserInfo(): Observable<User> {
+    const sess = this.getCredentials();
     const tokenheaders = { headers: new HttpHeaders({
-        'token': this.token, 'email': this.email
+      'token': sess.token, 'email': sess.email
     })};
     return this.http.get<User>(this.url + 'userinfo', tokenheaders)
       .pipe(
@@ -71,11 +70,15 @@ export class UserService {
 
 
   /*
-    KÄYTTÄJÄN TIETOJEN PÄIVITTÄMINEN
+   KÄYTTÄJÄN TIETOJEN PÄIVITTÄMINEN
+    Funktio ottaa vastaan uudet käyttäjän tiedot, jotka se vie palvelinpuolelle
+    ja yrittää päivittää käyttäjän tietoja. Funktioon tarvitsee tavallisen
+    token-autentikaation.
   */
   updateUser(data: User, id: string): Observable<any> {
+    const sess = this.getCredentials();
     const tokenheaders = { headers: new HttpHeaders({
-        'token': this.token
+        'token': sess.token
     })};
     return this.http.put(this.url + 'upduser/' + id, data, tokenheaders)
       .pipe(
@@ -85,11 +88,15 @@ export class UserService {
 
 
   /*
-    KÄYTTÄJÄN SALASANAN PÄIVITTÄMINEN
+   KÄYTTÄJÄN SALASANAN PÄIVITTÄMINEN
+    Funktio joka päivittää käyttäjän salasanan. Salasanojen validointi tehdään
+    palvelinpuolella ja tämä funktio palauttaa käyttäjälle viestin onnistumisesta/
+    virheestä.
   */
   updateUserPwd(data, id: string): Observable<any> {
+    const sess = this.getCredentials();
     const tokenheaders = { headers: new HttpHeaders({
-        'token': this.token
+        'token': sess.token
     })};
     return this.http.put(this.url + 'updpwd/' + id, data, tokenheaders)
         .pipe(
@@ -99,11 +106,15 @@ export class UserService {
 
 
   /*
-    KÄYTTÄJÄN POISTAMINEN
+   KÄYTTÄJÄN POISTAMINEN
+    Funktio, joka poistaa käyttäjän. Käyttäjä voi itse tehdä tämän jos kirjoittaa
+    salasanan oikein.
+    // TODO: Anna Adminille mahdollisuus poistaa käyttäjä ?
   */
   deleteUser(password: string, id: string): Observable<any> {
+    const sess = this.getCredentials();
     const tokenheaders = { headers: new HttpHeaders({
-        'token': this.token, 'password': password
+        'token': sess.token, 'password': password
     })};
     return this.http.delete(this.url + 'deluser/' + id, tokenheaders)
       .pipe(
@@ -113,19 +124,22 @@ export class UserService {
 
 
   /*
-    TILAUKSEN SIIRTÄMINEN KÄYTTÄJÄN TILAUSHISTORIAAN
+   TILAUKSEN SIIRTÄMINEN KÄYTTÄJÄN TILAUSHISTORIAAN
+    Kun käyttäjä tekee onnistuneen tilauksen, tämä funktio vie sen palvelin-
+    puolelle validointiin. Käyttäjälle lähetetään onnistumis/virheviesti
+    tilaukssta.
   */
   addNewPurchase(payment: string, price: number): Observable<any> {
+    const sess = this.getCredentials();
     const tokenheaders = { headers: new HttpHeaders({
-        'token': this.token
+        'token': sess.token
     })};
     const products = JSON.parse(sessionStorage.getItem('products'));
-    return this.http.put(this.url + 'addNewPurchase/' + this.email,
+    return this.http.put(this.url + 'addNewPurchase/' + sess.email,
       { products, price, payment }, tokenheaders)
         .pipe(
           catchError(err => throwError(err.error)
     ));
   }
-
 
 }

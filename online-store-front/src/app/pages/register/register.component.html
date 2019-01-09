@@ -2,10 +2,14 @@
 rekisteröityä webbiapplikaatioon. Jokainen tieto validoidaan täällä, joka tehdään
 uudelleen vielä palvelinpuolella. Teema on tehty Bootstrapilla. -->
 
-<p class='alert alert-danger'>Kyseessä on ammattikorkeakoulun lopputyö. Sivusto
+<p class='alert alert-danger text-center'>Kyseessä on ammattikorkeakoulun lopputyö. Sivusto
 EI ole oikea verkkokauppa. Älä anna oikeita tietojasi, koska ne säilytetään verkossa
 olevassa tietokannassa eikä tietojen täydellistä turvallisuutta voida varmistaa.
 Tietojasi ei varmenneta, joten niiden ei tarvitse olla oikeita.</p>
+<p class='alert alert-info mb-5 text-center'>Jos haluat, että saat sähköpostiviestejä kun teet
+uusia tilauksia anna validi sähköposti. Voit käyttää esim.
+<a href='https://10minutemail.com' target='_blank'>10-Minutemailin</a>
+palveluja tähän tarkoitukseen</p>
 
 <!-- Luokka, joka sitoo koko formin yhteen -->
 <div class='form-group container mb-5'>
@@ -23,24 +27,30 @@ Tietojasi ei varmenneta, joten niiden ei tarvitse olla oikeita.</p>
     <div class='form-group'>
       <label>Etunimi</label>
       <input type='text' name='firstname' class='form-control'
-        ngModel required #firstname='ngModel' pattern='([-a-öA-Ö]+)'>
+        ngModel required #firstname='ngModel' pattern='[-a-öA-Ö]+'
+        minlength='2' maxlength='40'>
+      <div *ngIf='firstname.invalid && firstname.dirty && firstname.touched'
+        class='alert alert-warning'>
+        <div *ngIf='firstname.errors.required'>Etunimi ei voi olla tyhjä</div>
+        <div *ngIf='firstname.errors.minlength'>Etunimi on liian lyhyt</div>
+        <div *ngIf='firstname.errors.pattern'>Etunimessä ei saa olla erikoiskirjaimia</div>
+      </div>
     </div>
-    <small *ngIf='firstname.touched && firstname.invalid'
-        class='alert alert-warning input-group-text'> Etunimi on tyhjä tai siinä on virhe.
-          Älä käytä erikoismerkkejä (pl. "-").
-    </small>
 
 
     <!-- Sukunimi -->
     <div class='form-group'>
       <label>Sukunimi</label>
       <input type='text' name='surname' class='form-control'
-        ngModel required #surname='ngModel' pattern='([-a-öA-Ö]+)'>
+        ngModel required #surname='ngModel' pattern='[-a-öA-Ö]+'
+        minlength='2' maxlength='40'>
+      <div *ngIf='surname.invalid && surname.dirty && surname.touched'
+        class='alert alert-warning'>
+        <div *ngIf='surname.errors.required'>Etunimi ei voi olla tyhjä</div>
+        <div *ngIf='surname.errors.minlength'>Etunimi on liian lyhyt</div>
+        <div *ngIf='surname.errors.pattern'>Etunimessä ei saa olla erikoiskirjaimia</div>
+      </div>
     </div>
-    <small *ngIf='surname.touched && surname.invalid'
-        class='alert alert-warning input-group-text'> Sukunimi on tyhjä tai
-          siinä on virhe. Älä käytä erikoismerkkejä (pl. "-").
-    </small>
 
 
     <!-- Sähköposti -->
@@ -48,19 +58,29 @@ Tietojasi ei varmenneta, joten niiden ei tarvitse olla oikeita.</p>
       <label>Sähköposti</label>
       <input type='email' name='email' class='form-control'
         ngModel required #email='ngModel' pattern='^([a-zA-Z0-9])(([\-.]|[_]+)?([a-zA-Z0-9]+))*(@){1}[a-z0-9]+[.]{1}(([a-z]{2,3})|([a-z]{2,3}[.]{1}[a-z]{2,3}))'>
+      <div *ngIf='email.invalid && email.dirty && email.touched'
+        class='alert alert-warning'>
+        <div *ngIf='email.errors.required'>Sähköposti ei voi olla tyhjä</div>
+        <div *ngIf='email.errors.pattern'>Sähköposti on kirjoitettu väärin</div>
+      </div>
     </div>
-    <small *ngIf='email.touched && email.invalid'
-        class='alert alert-warning input-group-text'> Sähköposti on tyhjä tai se
-          on väärin kirjoitettu.
-    </small>
 
 
-    <!-- Lähiosoite -->
+    <!-- LÄHIOSOITE, POSTINUMERO JA POSTITOIMIPAIKKA -->
     <div class='form-row'>
+
+      <!-- Lähiosoite -->
       <div class='form-group col-md-6'>
         <label>Lähiosoite</label>
         <input type='text' name='address' class='form-control'
-          ngModel required #address='ngModel' pattern='([-a-öA-Ö0-9 ]+)'>
+          ngModel required #address='ngModel' pattern='[-a-öA-Ö0-9 ]+'
+          minlength='4' maxlength='50'>
+        <div *ngIf='address.invalid && address.dirty && address.touched'
+          class='alert alert-warning'>
+          <div *ngIf='address.errors.required'>Osoite ei voi olla tyhjä</div>
+          <div *ngIf='address.errors.minlength'>Osoite on liian lyhyt</div>
+          <div *ngIf='address.errors.pattern'>Osoite ei saa sisältää erikoiskirjaimia</div>
+        </div>
       </div>
 
 
@@ -68,8 +88,14 @@ Tietojasi ei varmenneta, joten niiden ei tarvitse olla oikeita.</p>
       <div class='form-group col-md-2'>
         <label>Postinumero</label>
         <input type='text' name='postnumber' class='form-control'
-          ngModel required maxlength='5' minlength='5' #postnumber='ngModel'
-            pattern='[0-9]{5}$'>
+          ngModel #postnumber='ngModel' required
+            maxlength='5' minlength='5' pattern='[0-9]{5}$'>
+          <div *ngIf='postnumber.invalid && postnumber.dirty && postnumber.touched'
+            class='alert alert-warning'>
+            <div *ngIf='postnumber.errors.required'>Postinumero ei voi olla tyhjä</div>
+            <div *ngIf='postnumber.errors.minlength'>Postinumero on liian lyhyt</div>
+            <div *ngIf='postnumber.errors.pattern'>Postinumero sisältää vain numeroita</div>
+          </div>
       </div>
 
 
@@ -77,43 +103,46 @@ Tietojasi ei varmenneta, joten niiden ei tarvitse olla oikeita.</p>
       <div class='form-group col-md-4'>
         <label>Postitoimipaikka</label>
         <input type='text' name='city' class='form-control'
-          ngModel required #city='ngModel' pattern='([-a-öA-Ö]+)'>
+          ngModel required #city='ngModel' pattern='[-a-öA-Ö]+'
+          minlength='3' maxlength='40'>
+        <div *ngIf='city.invalid && city.dirty && city.touched'
+          class='alert alert-warning'>
+          <div *ngIf='city.errors.required'>Postitoimipaikka ei voi olla tyhjä</div>
+          <div *ngIf='city.errors.minlength'>Postitoimipaikka on liian lyhyt</div>
+          <div *ngIf='city.errors.pattern'>Postitoimipaikassa ei saa olla erikoiskirjaimia</div>
+        </div>
       </div>
+
     </div>
 
 
-    <!-- Osoitetietojen virhekäsittely -->
-
-    <!-- Lähiosoite -->
-    <small *ngIf='address.touched && regForm.form.hasError("required", "address")'
-        class='alert alert-warning input-group-text'> Lähiosoite ei voi olla tyhjä.
-    </small>
-    <!-- Postinumero -->
-    <small *ngIf='postnumber.touched && regForm.form.hasError("required", "postnumber")'
-        class='alert alert-warning input-group-text'> Postinumero ei voi olla tyhjä.
-    </small>
-    <!-- Postinumero - jossei sisällä tasan 5 numeroa -->
-    <small *ngIf='postnumber.invalid && postnumber.dirty && postnumber.touched'
-      class='alert alert-warning input-group-text'> Postinumero koostuu 5 numerosta.
-    </small>
-    <!-- Kaupunki -->
-    <small *ngIf='city.touched && regForm.form.hasError("required", "city")'
-        class='alert alert-warning input-group-text'> Postitoimipaikka ei voi olla tyhjä.
-    </small>
-
-
+    <div class='row'>
     <!-- Salasana -->
-    <div class='form-group'>
-      <label>Salasana</label>
-      <small><p>Salasanan pitää sisältää vähintään 8 merkkiä, yhden numeron sekä
-         yhden ison ja pienen kirjaimen.</p></small>
-      <input type='password' name='password' class='form-control' minlength='8' maxlength='30'
-        ngModel required #password='ngModel' pattern='((?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,30})'>
-    </div>
-    <small *ngIf='password.touched && regForm.form.hasError("required", "password")'
-        class='alert alert-warning input-group-text'> Salasana ei voi olla tyhjä.
-    </small>
+      <div class='col-md'>
+        <div class='form-group'>
+          <label>Salasana</label>
+          <small><p>(Vähintään 8 merkkiä, 1 numero sekä väh. 1 iso ja pieni kirjain.)</p></small>
+          <input type='password' name='password' class='form-control' minlength='8' maxlength='30'
+            ngModel required #password='ngModel' pattern='((?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,30})'>
+          <div *ngIf='password.invalid && password.dirty && password.touched'
+            class='alert alert-warning'>
+            <div *ngIf='password.errors.required'>Salasana on pakollinen</div>
+            <div *ngIf='password.errors.minlength'>Salasana on liian lyhyt</div>
+            <div *ngIf='password.errors.pattern'>Salasana ei ole tarpeeksi turvallinen</div>
+          </div>
+        </div>
+      </div>
 
+      <div class='col-md'>
+        <div class='form-group'>
+          <label>Salasana uudestaan</label>
+          <small><p>(Kirjoita sama salasana uudestaan.)</p></small>
+          <input type='password' name='repassword' class='form-control' minlength='8' maxlength='30'
+            ngModel required [(ngModel)]='repassword' pattern='((?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,30})'>
+        </div>
+      </div>
+
+    </div>
 
     <!-- Uutiskirje -->
     <div class='form-group'>
@@ -128,7 +157,9 @@ Tietojasi ei varmenneta, joten niiden ei tarvitse olla oikeita.</p>
 
     <!-- Lähetä -painike, jota ei voida painaa jossei formi ole kunnossa -->
     <button type='submit' class='btn btn-success'
-      [disabled]='!regForm.form.valid'>Rekisteröidy
+      [disabled]='!regForm.form.valid'>
+        <span *ngIf='!processing'>Rekisteröidy</span>
+        <span *ngIf='processing'><i class='fa fa-spinner fa-spin'></i></span>
     </button>
 
 

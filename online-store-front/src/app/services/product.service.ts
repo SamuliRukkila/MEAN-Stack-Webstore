@@ -10,11 +10,6 @@ import { environment } from '../../environments/environment.prod';
 
 import { Product } from '../dataclasses/Product';
 
-const headers = {
-  headers: new HttpHeaders({
-    'Content-Type': 'application/json'
-  })
-};
 
 @Injectable({
   providedIn: 'root'
@@ -32,7 +27,10 @@ export class ProductService {
 
 
   /*
-    HAKEE TOKENIN SESSIONSTORAGESTA
+   HAKEE TOKENIN SESSIONSTORAGESTA
+    Tämä funktio ajetaan joka kerta kun komponentti käyttää tätä serviceä.
+    Se hakee SessionStoragesta käyttäjälle luovutetun tokenin ja laittaa
+    sen paikalliseen muuttujaan.
   */
   getToken(): void {
     const sessValues = sessionStorage.getItem('credentials') ?
@@ -40,8 +38,11 @@ export class ProductService {
     if (sessValues) this.token = sessValues.token;
   }
 
+
   /*
-    HAKEE KAIKKI TUOTTEET
+   HAKEE KAIKKI TUOTTEET
+    Funktio hakee kaikki tuotteet palvelinpuolelta. Tähän et tarvitse tokenia
+    tai edes olla kirjautunut.
   */
   getProducts(): Observable<Product[]> {
     return this.http.get<Product[]>(this.url + 'allproducts')
@@ -50,11 +51,14 @@ export class ProductService {
     ));
   }
 
+
   /*
-    HAKEE TUOTTEEN NIMEN PERUSTEELLA (safename)
+   HAKEE TUOTTEEN NIMEN PERUSTEELLA
+    Funktio hakee URL-turvallisen (safename) nimen mukaan tuotteen. Funktio
+    palauttaa onnistuineissa tilanteissa vain yhden (1) tuotteen käyttäjälle.
   */
   getProduct(safename: string): Observable<Product> {
-    return this.http.get<Product>(this.url + 'name/' + safename, headers)
+    return this.http.get<Product>(this.url + 'name/' + safename)
       .pipe(
         catchError(err => throwError(err.error)
     ));
@@ -62,47 +66,76 @@ export class ProductService {
 
 
   /*
-    HAKEE KAIKKI TUOTTEET TUOTELAJIN PERUSTEELLA
+   HAKEE KAIKKI TUOTTEET LAJITYYPIN MUKAAN
+    Funktio hakee palvelinpuolelta kaikki tuotteet, jotka ovat tietyn tuotelajin
+    (tässä tapauksessa safetype) mukaisia.
   */
   getProductsByType(safetype: string): Observable<Product[]> {
-    return this.http.get<Product[]>(this.url + 'type/' + safetype, headers)
+    return this.http.get<Product[]>(this.url + 'type/' + safetype)
       .pipe(
         catchError(err => throwError(err.error)
     ));
   }
 
+
   /*
-    HAKEE KAIKKI TUOTELAJIT/TYYPIT
+   HAKEE KAIKKI TUOTELAJIT
+    Funktio hakee kaikki tuotelajit palvelinpuolelta (myös safetypen URL-
+    turvallisiin reitityksiin). Tuotelajit eivät ole omassa tietokannassa
+    vaan integroitu tuotteiden kanssa. Jos lisätuotelajeja on tarkoitus tehdä,
+    joudutaan tietokantahallintasivulla tehdä uusi tuote uudella tuotelajilla.
   */
   getProductTypes(): Observable<any[]> {
-    return this.http.get<any[]>(this.url + 'getalltypes', headers)
+    return this.http.get<any[]>(this.url + 'getalltypes')
       .pipe(
         catchError(err => throwError(err.error)
     ));
   }
 
+
   /*
-    LUO UUDEN TUOTTEEN
+   LUO UUDEN TUOTTEEN
+    Funktio, joka luo uuden tuotteen Admin-käyttäjän antamien tietojen perusteella.
+    Tähän tarvitaan Admin-luokan autentikaatio. Jos tuotteen luominen onnistuu
+    luodaan seuraavassa funktiossa tuotteelle kuva.
   */
   createProduct(product: Product): Observable<Product> {
-    return this.http.post<Product>(this.url + 'createproduct', product, headers)
+    this.getToken();
+    const theaders = { headers: new HttpHeaders({
+        'token': this.token, 'Content-Type': 'application/json'
+    })};
+    return this.http.post<Product>(this.url + 'createproduct', product, theaders)
       .pipe(
         catchError(err => throwError(err)
     ));
   }
 
+
   /*
-    PÄIVITTÄÄ VANHAN TUOTTEEN
+   PÄIVITTÄÄ VANHAN TUOTTEEN
+    Funktio, joka päivittää vanhan tuotteen. Turvasyistä (ja hakusyistä) EAN-
+    koodia ei voida päivittää. Tarvitaan Admin-luokan autentikaatio. Palauttaa
+    päivitetyn tuotteen jos päivitys onnistuu.
   */
   updateProduct(product: Product): Observable<Product> {
-    return this.http.put<Product>(this.url + 'updateproduct', product, headers)
+    this.getToken();
+    const theaders = { headers: new HttpHeaders({
+        'token': this.token, 'Content-Type': 'application/json'
+    })};
+    return this.http.put<Product>(this.url + 'updateproduct', product, theaders)
       .pipe(
         catchError(err => throwError(err.error)
     ));
   }
 
+
   /*
-    LIITTÄÄ KUVAN JUURI LUOTUUN TUOTTEESEEN
+   LIITTÄÄ KUVAN LUOTUUN TUOTTEESEEN
+    Funktio, joka liittää kuvan juuri luotuun kuvaan. Jos uuden tuotteen luonti
+    onnistuu tämä funktio suoritetaan. Kuvasta tehdään uusi FormData, jota
+    palvelinpuoli voi ottaa vastaan. Kuvaan liitetään myös oma nimi, joka on
+    safetype + .png. Adminin ei siis tarvitse itse nimetä kuvaa vaan se tehdään
+    automaattisesti.
   */
   addImageToProduct(imgfile: File, imgname: string): Observable<any> {
     const fd = new FormData();
@@ -113,18 +146,29 @@ export class ProductService {
     ));
   }
 
+
   /*
-    POISTAA TUOTTEEN
+   POISTAA TUOTTEEN
+    Funktio joka poistaa Admin-käyttäjän valitseman tuotteen EAN-koodin
+    perusteella.
   */
   deleteProduct(ean: string, img: string): Observable<any> {
-    return this.http.delete(`${this.url}deleteproduct/${ean}/${img}`)
+    this.getToken();
+    const theaders = { headers: new HttpHeaders({
+        'token': this.token
+    })};
+    return this.http.delete(`${this.url}deleteproduct/${ean}/${img}`, theaders)
       .pipe(
         catchError(err => throwError(err.error)
     ));
   }
 
+
   /*
-    HAKEE TUOTTEITA TIETYN SANAN MUKAAN (name)
+   HAKEE TUOTTEEN/TUOTTEITA HAKUSANAN MUKAAN
+    Funktio hakee uusia tuotteita hakusanan (name) mukaan 300ms välein tai kun
+    käyttäjän antama termi vaihtuu. Jos hakusana on tyhjä palautetaan tyhjä
+    Observable-taulukko, muussa tapauksessa tuotteen / monta tuotetta.
   */
   searchProducts(term: string): Observable<Product[]> {
     // Jos hakusana on tyhjä
@@ -134,7 +178,5 @@ export class ProductService {
         catchError(err => throwError(err.error)
     ));
   }
-
-
 
 }

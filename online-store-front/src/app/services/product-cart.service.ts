@@ -115,4 +115,45 @@ export class ProductCartService {
     sessionStorage.setItem('products', JSON.stringify(cart));
     this.productCart.next(cart);
   }
+
+
+  /*
+   LISÄÄ VALITUN TUOTTEEN MÄÄRÄÄ
+    Funktio lisää tuotteen määrää. Kaikki tuotteet käydään läpi for-loopissa
+    jossa valitaan oikea arvo EAN-koodin avulla. Kun EAN löydetään, lisätään
+    sen tuotteen määrää yhdellä. (Maksimimäärä 9)
+  */
+  increaseItemFromBasket(ean: string): void {
+    const products = JSON.parse(sessionStorage.getItem('products'));
+    for (let i = 0; i < products.length; i++) {
+      if (products[i].ean === ean) {
+        if (products[i].amount > 8) break;
+        products[i].amount += 1;
+        break;
+      }
+    }
+    sessionStorage.setItem('products', JSON.stringify(products));
+    this.productCart.next(products);
+  }
+
+
+  /*
+   VÄHENTÄÄ VALITUN TUOTTEEN MÄÄRÄÄ
+    Funktio vähentää tuotteen määrää. Kaikki tuotteet käydään läpi for-loopissa
+    jossa valitaan oikea arvo EAN-koodin avulla. Kun EAN löydetään, vähennetään
+    sen tuotteen määrää yhdellä. (Minimimäärä 1)
+  */
+  decreaseItemFromBasket(ean: string): void {
+    const products = JSON.parse(sessionStorage.getItem('products'));
+    for (let i = 0; i < products.length; i++) {
+      if (products[i].ean === ean) {
+        if (products[i].amount < 2) break;
+        products[i].amount -= 1;
+        break;
+      }
+    }
+    sessionStorage.setItem('products', JSON.stringify(products));
+    this.productCart.next(products);
+  }
+
 }

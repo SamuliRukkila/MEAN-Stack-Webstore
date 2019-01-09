@@ -1,33 +1,70 @@
-<div class='row'>
-  <div *ngFor='let product of products' class='col-sm-12 col-lg-4 pb-3 px-1'>
-    <div class='card h-100 border-secondary'>
-      <a routerLink='/tuote/{{ product.safename }}' class='border-bottom'>
-        <img class='card-img-top' [src]='imageurl + product.img' [alt]='product.name'></a>
+<div *ngIf='!products' class='alert alert-dark mx-auto'>
+  <i class='fa fa-spinner fa-spin'></i><b class='ml-2'> Ladataan sivua..</b>
+</div>
+
+
+<blockquote class='blockquote text-center'>
+  <p class='mb-0'>Suhautus on jo vuodesta 1998 aloittanut tietokoneen varaosien
+    jälleenmyyjä. Täältä löydät mitä erikoisimmat hilavitkuttimet sekä mahtavimmat tarjoukset.</p>
+  <footer class='blockquote-footer'><cite title='Source Title'> (Kiisseli-Kaija, Suhautus)</cite></footer>
+</blockquote>
+<hr>
+
+
+<!-- Frontpage on fixattu sivu, johon käyttäjä tuodaan kun hän saapuu sivustolle
+ensimmäistä kertaa. Sivusto näyttää 9 ensimmäistä tuotetta palvelinpuolelta. -->
+<div class='background-content'>
+  <div class='row'>
+    <div *ngFor='let product of products' class='col-sm-12 col-lg-4 pb-3 px-1'>
+      <div class='card h-100 border-secondary'>
+        <a routerLink='/tuote/{{ product.safename }}' class='border-bottom'>
+          <img class='card-img-top' [src]='imageurl + product.img' [alt]='product.name'></a>
         <div class='card-body bg-light '>
-        <h4 class='card-title'><a routerLink='/tuote/{{ product.safename }}'>
-            {{ product.name }}</a></h4>
-        <h5 class='card-text'>{{ product.type }}</h5>
-        <ul class='card-text h-50 nav-link'>
-          <li class='nav-item overflow-hidden' *ngFor='let p of product.bulletpoints'>
-            <span *ngIf='p.length > 40'>{{ p | slice:0:40 }}..</span>
-            <span *ngIf='p.length < 41'>{{ p }}</span>
-          </li>
-        </ul>
-      </div>
-        <div class='card-footer bg-dark overflow-hidden'>
+          <h4 class='card-title'><a routerLink='/tuote/{{ product.safename }}'>
+              {{ product.name }}</a></h4>
+          <h5 class='card-text'>{{ product.type }}</h5>
+          <ul class='card-text h-50 nav-link'>
+            <li class='nav-item' *ngFor='let p of product.bulletpoints'>
+              <span *ngIf='p.length > 40'>{{ p | slice:0:40 }}..</span>
+              <span *ngIf='p.length < 41'>{{ p }}</span>
+            </li>
+          </ul>
+        </div>
+        <div class='card-footer bg-dark'>
           <div class=row>
-            <div class='col-md-12 col-lg-6 mb-1'>
-              <button (click)='addToCart(product)' class='btn btn-primary'>
+            <div class='col-md-6 col-lg-6 mb-1'>
+              <button (click)='addToCart(product)' data-toggle='modal' data-target='#item-placed' class='btn btn-primary btn-block'>
                 {{ product.price }} € <i class='fa fa-cart-plus px-2'></i>
               </button>
             </div>
             <div class='col'>
-              <button routerLink='/tuote/{{product.safename}}' class='btn btn-success btn-block'>
-                Lue lisää <i class='fa fa-mail-forward'></i>
+              <button routerLink='/tuote/{{product.safename}}' class='btn btn-success btn-block'>Lue lisää
+                <i class='fa fa-mail-forward'></i>
               </button>
             </div>
           </div>
         </div>
+      </div>
+      <!-- Bootstrapin Modal-ikkuna, joka tulee näkyviin kun käyttäjä lisää tuotteen ostoskoriin -->
+      <div class='modal fade' id='item-placed' aria-hidden='true'>
+        <div class='modal-dialog modal-dialog-centered'>
+          <div class='modal-content'>
+            <div class='modal-header'>
+              <h5 class='modal-title' id='exampleModalLabel'>Lisäsit tuotteen ostoskoriin</h5>
+              <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+                <span aria-hidden='true'>&times;</span>
+              </button>
+            </div>
+            <div class='modal-body'>
+              {{ product.name }} | {{ product.price }}€
+            </div>
+            <div class='modal-footer'>
+              <button type='button' class='btn btn-secondary' data-dismiss='modal'>Jatka selailua</button>
+              <button type='button' routerLink='/maksu' data-dismiss='modal' class='btn btn-primary'>Mene kassalle</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

@@ -11,6 +11,7 @@ require('log-timestamp');
 // Yhteys MongoDB:n
 require('./dbconn');
 
+
 // Tehdään Express-kirjastosta paikallinen muuttuja
 const app = express();
 // Cors käyttöön / Cross-domain

@@ -1,10 +1,15 @@
+<!-- 2 navigointipalkkia jotka sisältävät kaiken tarvittavan informaation.
+Navigointipalkit ovat täysin responsiivisia jopa 1080px > 300px asti. Responsiivisuudessa
+on käytetty Bootstrapin lisäksi myös paljon Media Query Pointteja, hyvään
+kokemukseen. Alempi, tummempi navigointipalkki on sticky, eli se seuraa käyttäjää. -->
+
 <!-- YLEMPI NAVIGOINTIPALKKI -->
 <nav class='navbar navbar-expand-sm navbar-light bg-light'>
 
   <!-- Logo sekä otsikko -->
   <div class='d-inline-block'>
     <a class='navbar-brand' routerLink='/etusivu'>
-      <img src='../../assets/img/header-logo.svg'
+      <img src='assets/img/header-logo.svg'
         width='45px' height='40' alt='logo'>
       uhautus <small> - se ainoa oikea IT-jälleenmyyjä.</small>
     </a>
@@ -30,7 +35,7 @@
       </li>
       <li class='nav-item'>
         <a class='nav-link text-body' routerLinkActive='active'
-          routerLink='/faq'> FAQ
+          routerLink='/FAQ'> FAQ
         </a>
       </li>
       <li class='nav-item'>
@@ -54,7 +59,7 @@
         <div class='dropdown-menu' style='right: 0; left: auto; z-index: 9999;'
           aria-labelledby='#userinfo-dropdown'>
           <li class='nav-item' *ngIf='admin'>
-            <a class='nav-link text-body' href='/admin'>Admin</a>
+            <a class='nav-link text-body' routerLink='/admin'>Admin</a>
           </li>
           <li class='nav-item'>
             <a class='nav-link text-body' routerLink='/profiili'>Profiili</a>
@@ -76,19 +81,20 @@
 
 
 <!-- ALEMPI NAVBAR -->
-<nav class='navbar navbar-dark bg-dark sticky-top'>
+<nav class='navbar navbar-dark bg-dark sticky-top' style='position: sticky !important'>
+
 
   <!-- Tuotteiden haku sekä haun tulokset -->
-  <form id='search-form' #searchForm='ngForm'>
-    <input class='form-control' #searchBar id='search-bar' type='text'
-      placeholder='Hae tuotteita..' (input)='search(searchBar.value)'>
+  <form id='search-form' #searchForm='ngForm' novalidate>
+    <input class='form-control' name='searchBar' #searchBar='ngModel' ngModel type='text'
+      placeholder='Hae tuotteita..' (input)='search(searchBar.value)' id='search-bar'>
     <div class='position-absolute'>
-      <ul class='navbar-nav rounded'>
+      <ul class='navbar-nav rounded' *ngIf='search_session' (clickOutside)='resetForm(searchForm)'>
         <li class='nav-item p-3 bg-light dropdown-results'
-        *ngFor='let product of products$ | async'>
-          <hr>
+        *ngFor='let product of products$ | async; let i = index'>
+          <span *ngIf='i > 0'><hr></span>
           <a routerLink='tuote/{{product.safename}}'
-          (click)='this.form.reset()' class='text-dark'>
+           (click)='resetForm(searchForm)' class='text-dark'>
             <div class='row'>
               <div class='col'>
                 {{ product.name }} <small> | {{ product.price }}€</small>
@@ -109,13 +115,15 @@
   <ul class='navbar-nav flex-row'>
     <li class='nav-item' *ngFor='let type of productTypes'>
       <a class='pl-4 pr-4 nav-link categories' routerLinkActive
-        routerLink='tuotelaji/{{ type.safetype }}'> {{ type.type }}
+        routerLink='tuotelaji/{{type.safetype}}'> {{ type.type }}
       </a>
     </li>
   </ul>
 
+
   <!-- Oikealla reunassa olevat painikkeet. (2. navigointipalkki) -->
   <ul class='navbar-nav flex-row'>
+
     <!-- Kaikki tuotelajit (kun näytön leveys on tarpeeksi pieni) -->
     <li class='nav-item pr-2'>
       <div class='dropdown'>
@@ -127,11 +135,12 @@
         <div class='dropdown-menu position-absolute' style='right: 0; left: auto;'
           aria-labelledby='#categories-dropdown'>
           <a *ngFor='let type of productTypes' class='dropdown-item'
-            routerLink='tuotelaji/{{ type.safetype }}'> {{ type.type }}
+            routerLink='tuotelaji/{{type.safetype}}'> {{ type.type }}
           </a>
         </div>
       </div>
     </li>
+
 
     <!-- Kassalle -nappi -->
     <li class='nav-item pr-2' id='payment'>
@@ -141,8 +150,9 @@
       </button>
     </li>
 
+
     <!-- Tuotekori -->
-    <li class='nav-item'>
+    <li class='nav-item' *ngIf='basketToProceedSession'>
       <div class='dropdown'>
         <button class='btn btn-primary dropdown-toggle' type='button'
           id='items-basket-dropdown' data-toggle='dropdown'
@@ -151,11 +161,12 @@
         </button>
         <ul class='dropdown-menu dropdown-cart position-absolute'
             aria-labelledby='#items-basket-dropdown'
-            role='menu' style='right: 0; left: auto;'>
+            role='menu' style='right: 0; left: auto;'
+            (click)="$event.stopPropagation()">
           <li class='nav-item dropdown-cart'>
             <div class='row px-2 pb-0 mb-0 center-block text-center'>
               <div class='col pt-1'>
-                <button routerLink='/maksu' class='btn btn-block btn-success'
+                <button (click)='closeCart()' routerLink='/maksu' class='btn btn-block btn-success'
                   type='button' [disabled]='productCart && productCart.length < 1'>
                    <i class='fa fa-credit-card'></i> Tilaukseen
                 </button>
@@ -167,15 +178,22 @@
               </div>
             </div>
           </li>
+          <!-- Ostoskorissa ei tuotteita -->
           <li *ngIf='productCart && productCart.length < 1' class='p-3 text-center'>
             Ostoskorissasi ei ole vielä tuotteita
           </li>
+          <!-- Ostoskorissa väh. 1 tuote -->
           <li *ngFor='let product of productCart' class='dropdown-cart p-3 text-center'>
             <hr>
             <img [src]='imageurl + product.img' [alt]='product.safename'
               class='img-fluid pull-left' height='50px' width='50px'>
             <span class='pl-3 pull-left'>
-              {{ product.name }}
+              <span *ngIf='product.name.length > 14'>
+                {{ product.name | slice:0:14 }}..
+              </span>
+              <span *ngIf='product.name.length < 15'>
+                {{ product.name }}
+              </span>
               <small>({{ product.price }} €)</small>
             </span>
             <div class='bg-dark mb-2 d-inline-block p-1 rounded pull-right'>
@@ -185,11 +203,18 @@
               <button (click)='removeFromBasket(product.ean)'
                 class='px-2 py-0 btn btn-danger ml-2'><i class='fa fa-trash'></i>
               </button>
+              <button  class='btn btn-dark py-0 px-1 ml-2'
+                (click)='increaseItem(product.ean)'><i class='fa fa-plus-square-o'></i>
+              </button>
+              <button class='btn btn-dark py-0 px-1 ml-2'
+                (click)='decreaseItem(product.ean)'><i class='fa fa-minus-square-o'></i>
+              </button>
             </div>
           </li>
         </ul>
       </div>
     </li>
+
   </ul>
 
 </nav>

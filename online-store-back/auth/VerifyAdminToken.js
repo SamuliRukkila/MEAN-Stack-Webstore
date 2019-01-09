@@ -28,6 +28,7 @@ verifyAdminToken = (req, res, next) => {
 
   // Tokenin tarkastus
   jwt.verify(token, config.secret, (err, decoded) => {
+    console.log(decoded);
     // Virhe tarkastusvaiheessa
     if (err) {
       res.status(500).send('Virhe autentikaatiossa. Kokeile uudestaan.');

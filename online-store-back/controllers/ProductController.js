@@ -10,7 +10,7 @@ const Product = require('../models/Product');
 
 // Globaali palvelinpuolen informointi
 const serverInfo = msg => {
-  console.log('@@ SERVER @@ [ProductCtrl => ] ' + msg);
+  console.log('@@ SERVER @@ [ProductCtrl => ' + msg);
 }
 
 /**
@@ -156,7 +156,7 @@ const ProductController = {
     Product.find({ name: nameRegex }, (err, products) => {
       if (err) {
         serverInfo('searchProducts()]: Error: ' + err);
-        return res.status(500).send('Virhe tuotteita haussa.');
+        return res.status(500).send('Virhe tuotteita haussa');
       }
       return res.send(products);
     });

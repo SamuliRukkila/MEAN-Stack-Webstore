@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { environment } from '../../environments/environment.prod';
+import { NgForm } from '@angular/forms';
 
 import { AuthService } from '../services/auth.service';
 import { ProductService } from '../services/product.service';
@@ -33,6 +34,11 @@ export class NavbarComponent implements OnInit {
   public products$: Observable<Product[]>;
   private searchTerms = new Subject<string>();
 
+  // Onko haku käynnissä
+  public search_session = true;
+  // Mennäänkö suoraan tuotekorista maksuun
+  public basketToProceedSession = true;
+
   constructor (
     private authService: AuthService,
     private productService: ProductService,
@@ -57,6 +63,23 @@ export class NavbarComponent implements OnInit {
       distinctUntilChanged(),
       switchMap((term: string) => this.productService.searchProducts(term))
     );
+  }
+
+
+  // Kun käyttäjä etsii näytetään tuotteet jotka vastaavat hakua, tämä muutetaan
+  // kuitenkin hetkellisesti Falseksi kun käyttäjä klikkaa tuotetta TAI
+  // kun käyttäjä klikkaa pois hausta
+  resetForm(form: NgForm): void {
+    this.search_session = false;
+    setTimeout(() => this.search_session = true, 1000);
+    form.reset();
+  }
+
+  // Normaalisti tuotekori-menu ei sulkeudu, jos käyttäjä navigoi itsensä
+  // tätä kautta "tilaukseen". Tämän avulla saamme sen kuitenkin sulkeutumaan.
+  closeCart(): void {
+    this.basketToProceedSession = false;
+    setTimeout(() => this.basketToProceedSession = true, 50);
   }
 
 
@@ -145,6 +168,24 @@ export class NavbarComponent implements OnInit {
   */
   removeFromBasket(ean: string): void {
     this.productCartService.removeFromBasket(ean);
+  }
+
+
+  /*
+   LISÄÄ TUOTTEEN MÄÄRÄÄ OSTOSKORISSA
+    Nimensä mukaan lisää yhden (1) tuotteen jo olemassa olevaan tuotteseen.
+  */
+  increaseItem(ean: string): void {
+    this.productCartService.increaseItemFromBasket(ean);
+  }
+
+
+  /*
+   VÄHENTÄÄ TUOTTEEN MÄÄRÄÄ OSTOSKORISSA
+    Nimensä mukaan vähentää yhden (1) tuotteen jo olemassa olevasta tuotteesta.
+  */
+  decreaseItem(ean: string): void {
+    this.productCartService.decreaseItemFromBasket(ean);
   }
 
 

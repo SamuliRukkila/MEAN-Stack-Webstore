@@ -8,9 +8,11 @@ const config = require('../auth/config');
 // Käyttäjästä tehty model, jota käytetään MongoDB-kyselyissä
 const User = require('../models/User');
 
+const NodeMailer = require('../nodemailer');
+
 // Globaali palvelinpuolen informointi
 const serverInfo = msg => {
-  console.log('@@ SERVER @@ [UserCtrl => ' + msg);
+  console.log('@@ SERVER @@ [UserCtrl => ' + msg);
 }
 
 
@@ -62,7 +64,7 @@ const UserController = {
    */
   getAllUsers: (req, res) => {
     serverInfo('getAllUsers()]: Getting all users');
-    User.find({}, { password: 0 }, (err, users) => {
+    User.find({}, { password: 0 }, (err, users) => {
       if (err) {
         serverInfo('getAllUsers()]: Error: ' + err);
         return res.status(500).send('Virhe kaikkien käyttäjien tuonnissa')
@@ -169,27 +171,27 @@ const UserController = {
     User.findById(req.params.id, (err, user) => {
       if (err) {
         serverInfo('deleteUser()]: Error while deleting user: ' + err);
-        return res.status(500).send('Virhe käyttäjää etsiessä');
+        return res.status(500).send('Virhe käyttäjää etsiessä' + req.params.id + '|' + user.firstname);
       }
       // Käyttäjää ei löydy
       if (!user) {
-        serverInfo('deleteUser()]: Did not found user: ' + req.params.id);
+        serverInfo('deleteUser()]: Did not found user: ' + req.params.id + '|' + user.firstname);
         return res.status(404).send('Käyttäjää ei löytynyt');
       }
       // Väärä salasana
       if (!bcrypt.compareSync(req.headers['password'], user.password)) {
-        serverInfo('deleteUser()]: Wrong password.');
-        return res.status(401).send('Väärä(t) salasana(t)');
+        serverInfo('deleteUser()]: Wrong password for ' + req.params.id + '|' + user.firstname);
+        return res.status(401).send('Väärä salasana / salasanat');
       }
       // Poistetaan käyttäjä
       user.remove(err => {
         // Virhe käyttäjän poistossa
         if (err) {
           serverInfo('deleteUser()]: Could not remove user: ' + err);
-          return res.status(500).send('Virhe käyttäjän poistossa');
+          return res.status(500).send('Virhe käyttäjätunnuksen poistossa');
         }
-        serverInfo('deleteUser()]: User removed successfully.');
-        return res.send('Käyttäjäsi on poistettu');
+        serverInfo('deleteUser()]: User removed successfully: ' + req.params.id + '|' + user.firstname);
+        return res.send();
       })
     })
   },
@@ -209,18 +211,19 @@ const UserController = {
   addNewPurchase: (req, res) => {
     serverInfo('addNewPurchase()]: Adding new purchase');
     // Pusketaan käyttäjän product_history -tietokantataulukkoon uusi alkio
-    User.findOneAndUpdate({ email: req.params.email} , { $push: { purchase_history: {
+    User.findOneAndUpdate({ email: req.params.email} , { $push: { purchase_history: {
       date: new Date(),
       products: req.body.products,
       payment_type: req.body.payment,
       price: req.body.price
-    }}}, { new: true }).then(user => {
+    }}}, { new: true }).then(user => {
       if (!user) {
         serverInfo('addNewPurchase()]: Student not found with ' + req.params.email);
         return res.status(404).send(
           'Käyttäjää ei löytynyt'
       )}
       serverInfo('addNewPurchase()]: New purchase added for: ' + req.params.email);
+      NodeMailer(req.params.email, req.body.products, req.body.payment, req.body.price)
       res.send(user);
     }).catch(err => {
       serverInfo('addNewPurchase()]: Error while adding new \

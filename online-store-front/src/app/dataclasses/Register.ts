@@ -11,3 +11,4 @@ export class Register {
     public send_email: boolean
   ) {}
 }
+

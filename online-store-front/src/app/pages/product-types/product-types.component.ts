@@ -37,8 +37,12 @@ export class ProductTypesComponent implements OnInit {
     this.handleSubscription();
   }
 
-  // Hoitaa komponentin tilauksen => ottaa vastaan sivun urlin parametrin,
-  // jotta sivun vaihtaminen samassa komponentissa on mahdollista
+  /*
+   TILAUKSEN HOITO
+    Funktio ottaa URL-osoitteen parametrin muistiin. Parametri tilataan, jotta
+    saman komponentin sisällä oleva navigointi on mahdollista. Parametri
+    lähetetään toiselle funktiolle hoidettavaksi.
+  */
   handleSubscription(): void {
     this.productSubscription = this.route.params.subscribe(
       (params: Params) => this.getProducts(params.safetype)
@@ -46,22 +50,23 @@ export class ProductTypesComponent implements OnInit {
   }
 
   /*
-    LISÄÄ TUOTTEEN OSTOSKORIIN
+   LISÄÄ TUOTTEEN OSTOSKORIIN
+    Nimensä mukaan funktio lisää tuotteen tuotekoriin ProductCartServicen avulla.
   */
   addToCart(product: ProductCart) {
     this.productCartService.addToProductCart(product);
   }
 
   /*
-    HAETAAN TUOTTEET TUOTELAJIN MUKAAN
+   HAETAAN TUOTTEET TUOTELAJIN MUKAAN
     Haetaan osoitteen parametrin mukana tullut avainsana, joka tuodaan mukaan
     hakuun,jossa etsitään tietyn tuotelajin mukaisia tuotteita.
   */
   getProducts(param: string): void {
     this.productService.getProductsByType(param)
-        .subscribe(product => this.products = product
-        , () => this.router.navigate(['/etusivu'])
-    );
+        .subscribe(product => this.products = product,
+          () => this.router.navigate(['/etusivu'])
+      );
   }
 
 }

@@ -1,3 +1,13 @@
+<div *ngIf='!user' class='alert alert-dark mx-auto'>
+  <i class="fa fa-spinner fa-spin"></i><b class='ml-2'> Ladataan sivua..</b>
+</div>
+
+<!-- Käyttäjän oma profiilisivu. Sivustossa käyttäjä näkee omat tietonsa, joita
+hän voi itse päivittää (pl. email). Sivustolla on mahdollista vaihtaa myös
+salasanaa tai poistaa oma käyttäjä kokonaan tietokannasta.
+
+Sivuston alapuolella käyttäjä näkee tilaushistoriansa sekä kaiken tiedon siitä. -->
+
 <div class='row'>
   <div class='col-md-6 border-right' *ngIf='user'>
     <h4>Minun tietoni</h4>
@@ -13,46 +23,89 @@
       <!-- Etunimi -->
       <div class='form-group'>
         <label>Etunimi</label>
-        <input type='text' name='firstname' class='form-control'
-          [(ngModel)]='user.firstname' required ngModel>
+        <input type='text' name='firstname' class='form-control' required
+          [(ngModel)]='user.firstname' #firstname='ngModel'
+          minlength='3' maxlength='40' pattern='([-a-öA-Ö]+)'>
+        <div *ngIf='firstname.invalid && firstname.dirty && firstname.touched'
+          class='alert alert-warning'>
+          <div *ngIf='firstname.errors.required'>Etunimi ei voi olla tyhjä</div>
+          <div *ngIf='firstname.errors.minlength'>Etunimi on liian lyhyt</div>
+          <div *ngIf='firstname.errors.pattern'>Etunimessä ei saa olla erikoiskirjaimia</div>
+        </div>
       </div>
+
 
       <!-- Sukunimi -->
       <div class='form-group'>
         <label>Sukunimi</label>
         <input type='text' name='surname' class='form-control'
-          [(ngModel)]='user.surname' required ngModel>
+          [(ngModel)]='user.surname' required #surname='ngModel'
+          minlength='3' maxlength='40' pattern='[-a-öA-Ö]+'>
+        <div *ngIf='surname.invalid && surname.dirty && surname.touched'
+          class='alert alert-warning'>
+          <div *ngIf='surname.errors.required'>Etunimi ei voi olla tyhjä</div>
+          <div *ngIf='surname.errors.minlength'>Etunimi on liian lyhyt</div>
+          <div *ngIf='surname.errors.pattern'>Etunimessä ei saa olla erikoiskirjaimia</div>
+        </div>
       </div>
 
-      <!-- Sähköposti -->
+
+      <!-- Sähköposti / Ei voi muokata päivityksessä -->
       <div class='form-group'>
         <label>Sähköposti</label>
         <input disabled type='email' name='email' class='form-control'
           [(ngModel)]='user.email' required ngModel>
       </div>
 
-      <!-- Lähiosoite -->
+
+      <!-- LÄHIOSOITE JA POSTINUMERO -->
       <div class='form-row'>
+
+        <!-- Lähiosoite -->
         <div class='form-group col-sm-8'>
           <label>Lähiosoite</label>
           <input type='text' name='address' class='form-control'
-            [(ngModel)]='user.address' required ngModel>
+            [(ngModel)]='user.address' required #address='ngModel'
+            minlength='4' maxlength='50' pattern='[-a-öA-Ö0-9 ]+'>
+          <div *ngIf='address.invalid && address.dirty && address.touched'
+            class='alert alert-warning'>
+            <div *ngIf='address.errors.required'>Osoite ei voi olla tyhjä</div>
+            <div *ngIf='address.errors.minlength'>Osoite on liian lyhyt</div>
+            <div *ngIf='address.errors.pattern'>Osoite ei saa sisältää erikoiskirjaimia</div>
+          </div>
         </div>
 
         <!-- Postinumero -->
         <div class='form-group col-sm'>
           <label>Postinumero</label>
           <input type='text' name='postnumber' class='form-control'
-            [(ngModel)]='user.postnumber' required ngModel pattern='[0-9]{5}$'>
+            [(ngModel)]='user.postnumber' required #postnumber='ngModel'
+            minlength='5' maxlength='5' pattern='[0-9]{5}$'>
+          <div *ngIf='postnumber.invalid && postnumber.dirty && postnumber.touched'
+            class='alert alert-warning'>
+            <div *ngIf='postnumber.errors.required'>Postinumero ei voi olla tyhjä</div>
+            <div *ngIf='postnumber.errors.minlength'>Postinumero on liian lyhyt</div>
+            <div *ngIf='postnumber.errors.pattern'>Postinumero sisältää vain numeroita</div>
+          </div>
         </div>
+
       </div>
+
 
       <!-- Postitoimipaikka -->
       <div class='form-group'>
         <label>Postitoimipaikka</label>
         <input type='text' name='city' class='form-control form-control'
-          [(ngModel)]='user.city' required ngModel>
+          [(ngModel)]='user.city' required #city='ngModel'
+          minlength='3' maxlength='40' pattern='[-a-öA-Ö]+'>
+        <div *ngIf='city.invalid && city.dirty && city.touched'
+          class='alert alert-warning'>
+          <div *ngIf='city.errors.required'>Postitoimipaikka ei voi olla tyhjä</div>
+          <div *ngIf='city.errors.minlength'>Postitoimipaikka on liian lyhyt</div>
+          <div *ngIf='city.errors.pattern'>Postitoimipaikassa ei saa olla erikoiskirjaimia</div>
+        </div>
       </div>
+
 
       <!-- Uutiskirje -->
       <div class='form-group'>
@@ -67,9 +120,10 @@
 
       <!-- Lähetä -painike, jota ei voida painaa jossei formi ole kunnossa -->
       <div class='form-row'>
-        <button type='submit'
-          [disabled]='!updateValuesForm.form.valid || !updateValuesForm.form.dirty'
-          class='btn btn-success'> Päivitä tietoni
+        <button type='submit'[disabled]='!updateValuesForm.form.valid || !updateValuesForm.form.dirty'
+          class='btn btn-success'>
+          <span *ngIf='!processing'>Päivitä tietoni</span>
+          <span *ngIf='processing'><i class='fa fa-spinner fa-spin'></i></span>
         </button>
       </div>
 
@@ -111,7 +165,9 @@
          yhden ison ja pienen kirjaimen.</p></small>
       <!-- Lähetä kysely salasanan uudistamisesta -->
       <button type='submit' class='btn btn-primary'
-        [disabled]='!updatePwdForm.form.valid'>Päivitä salasana
+        [disabled]='!updatePwdForm.form.valid'>
+          <span *ngIf='!processing'>Päivitä salasana</span>
+          <span *ngIf='processing'><i class='fa fa-spinner fa-spin'></i></span>
       </button>
     </form>
 
@@ -148,7 +204,9 @@
       <!-- Viimeinen varmistus -->
       <div class='form-group'>
         <button type='submit' class='btn btn-danger'
-          [disabled]='!deleteUserForm.form.valid'>Poista tunnukseni ikuisesti
+          [disabled]='!deleteUserForm.form.valid'>
+            <span *ngIf='!processing'>Poista tunnukseni ikuisesti</span>
+            <span *ngIf='processing'><i class='fa fa-spinner fa-spin'></i></span>
         </button>
       </div>
     </form>

@@ -16,16 +16,19 @@ import { User } from '../../dataclasses/User';
 })
 export class AdminComponent implements OnInit {
 
+  // Näyttää Adminille visuaalisena kuinka tuotetta ollaan luomassa/päivittämässä
+  public product_processing = false;
+  // Kahden sivun välillä oleva vaihdossana
   public page = 'prod';
-
+  // Two-way binding muuttuja, joka on tyhjä luokka aluksi - tulee sisältämään
+  // lomakkeen datan itsessään
   public fProduct = new Product();
-
+  // Sisältä väliaikaisen, turvallisen URL-nimen tuotteelle, joka luodaan
+  // samalla kun tuotteen nimeä luodaan
   private temporarySafeName: string;
-
   // Kertoo komponentille ollaanko tekemässä uutta
   // tiedostoa vai muokkaamassa jo olemassa olevaa
   public newProduct = true;
-
 
   // Tuotelajit | Tuotteet | Käyttäjät
   public productTypes: any[];
@@ -55,7 +58,13 @@ export class AdminComponent implements OnInit {
     this.getAllUsers();
   }
 
-  // Muuttaa käyttäjän antaman tekstikappaleen URL-turvalliseksi tekstiksi
+  /*
+   MUUTTAA NIMEN URL-TURVALLISEKSI NIMEKSI
+    Funktiota kutsutaan joka kerta kun käyttäjä kirjoittaa tuotteen nimeä.
+    Vaihtaa kaikki URL-haitalliset kirjaimet turvalliseksi, URL-dataksi.
+    Väliaikainen turvanimi napataan globaaliin muuttujaan, jota käytetään lopuksi
+    kun tuote luodaan.
+  */
   convert(name: string): string {
     if (name) {
       name = name.toLowerCase();
@@ -69,20 +78,19 @@ export class AdminComponent implements OnInit {
     } else return '';
   }
 
-  // Vaihtaa sivua samassa komponentissa käyttäjän ja tuotteen välillä
+  // Sivun vaihto // Tuotteen vaihto //
   changePage(): void {
     this.page = this.page === 'prod' ? 'user' : 'prod';
-  }
-
-  // Vaihto uuden tuotteen ja päivitettävän tuotteen välillä
-  changeProductAttribute(): void {
+  } changeProductAttribute(): void {
     this.newProduct = this.newProduct ? false : true;
   }
 
   /*
-    JO OLEMASSA OLEVAN TUOTTEEN MUOKKAUS
+   JO OLEMASSA OLEVAN TUOTTEEN MUOKKAUS
     Tuo päivitettävän tuotteen tiedot parametrina funktioon. Funktio
-    siirtää tiedot asiakasnäkymän lomakkeeseen päivitystä varten.
+    siirtää tiedot asiakasnäkymän lomakkeeseen päivitystä varten. Funktiossa
+    tiedot laitetaan väliaikaisesti staattisiin muuttujiin, jotka tuodaan
+    lomakkeen arvoihin.
   */
   updateProd(p: Product): void {
     // Siirrä käyttäjä muokkauspalkkiin
@@ -105,15 +113,21 @@ export class AdminComponent implements OnInit {
   }
 
 
-  // Kun kuva valitaan, viedään se muuttujaan. Samalla tieto lähtee toiseen
-  // muuttujaan, joka tulostaa käyttäjälle valitun kuvan nimen
+  /*
+   KUVAN VALINTA
+    Event-funktio, joka suoritetaan kun käyttäjä valitsee tuotteen. Eventistä
+    napataan kuva sekä tuotteen nimi muuttujiin, joita käytetään tuotteen teon
+    aikana.
+  */
   onfileSelected(event): void {
     this.imgfile = event.target.files[0];
     if (this.imgfile) this.imgSelected = event.target.files[0].name;
   }
 
+
   /*
-    KAIKKIEN TUOTTEIDEN HAKU
+   HAKEE KAIKKI TUOTTEET
+    Funktio joka yksinkertaisuudessaan hakee _kaikki_ tietokannat tuotteet.
   */
   getAllProducts(): void {
     this.productService.getProducts()
@@ -121,8 +135,10 @@ export class AdminComponent implements OnInit {
         err => console.error('Tuotteita ei voitu hakea' + err);
   }
 
+
   /*
-    KAIKKIEN TUOTELAJIEN HAKU
+   KAIKKIEN TUOTELAJIEN HAKU
+    Hakee kaikkien tuotteiden tuotelajit.
   */
   getProductTypes(): void {
     this.productService.getProductTypes()
@@ -130,8 +146,10 @@ export class AdminComponent implements OnInit {
         err => console.error('Tuotelajeja ei voitu hakea: ' + err);
   }
 
+
   /*
-    KAIKKIEN KÄYTTÄJIEN HAKU
+   KAIKKIEN KÄYTTÄJIEN HAKU
+    Hakee kaikki käyttäjät.
   */
   getAllUsers(): void {
     this.userService.getAllUsers()
@@ -141,7 +159,12 @@ export class AdminComponent implements OnInit {
 
 
   /*
-    UUDEN TUOTTEEN LUOMINEN / VANHAN PÄIVITTÄMINEN
+   UUSI TUOTE + KUVA
+    Funktio luo uuden tuotteen sekä liittää Adminin valitseman kuvan siihen.
+    Odotetaan, että tuotteen luominen onnistuu ja siitä palaa palvelinta
+    onnistumisviesti. Kun viesti saapuu lähetetään kuva palvelimella, joka hoitaa
+    sijoittelun sekä tallentamisen. Saapuvan tuotteen EAN-koodia käytetään hyväksi
+    kun etsitään juuri tehty tuote.
   */
   productHandler(pForm: NgForm) {
 
@@ -179,14 +202,17 @@ export class AdminComponent implements OnInit {
 
     // VANHA TUOTE
     } else {
+      this.product_processing = true;
       this.productService.updateProduct(this.fProduct)
         .subscribe(() => {
           this.productSuccess = 'Tuotteen päivitys onnistui';
+          this.product_processing = false;
           setTimeout(() => this.productSuccess = '', 4000);
           pForm.reset();
           this.changeProductAttribute();
           this.getAllProducts();
         }), err => {
+          this.product_processing = false;
           this.productFailed = err;
           setTimeout(() => this.productFailed = '', 4000);
         };
@@ -195,7 +221,8 @@ export class AdminComponent implements OnInit {
 
 
   /*
-    POISTA TUOTE
+   POISTAA TUOTTEEN
+    Funktio joka poistaa Adminin valitseman tuotteen.
   */
   deleteProd(ean: string, img: string): void {
      this.productService.deleteProduct(ean, img)

@@ -1,3 +1,29 @@
+<div *ngIf='!product' class='alert alert-dark mx-auto'>
+  <i class="fa fa-spinner fa-spin"></i><b class='ml-2'> Ladataan sivua..</b>
+</div>
+
+<div class='modal fade' id='item-placed' aria-hidden='true' *ngIf='product'>
+  <div class='modal-dialog modal-dialog-centered'>
+    <div class='modal-content'>
+      <div class='modal-header'>
+        <h5 class='modal-title' id='exampleModalLabel'>Lisäsit tuotteen ostoskoriin</h5>
+        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+          <span aria-hidden='true'>&times;</span>
+        </button>
+      </div>
+      <div class='modal-body'>
+        {{ product.name }} | {{ product.price }}€
+      </div>
+      <div class='modal-footer'>
+        <button type='button' class='btn btn-secondary' data-dismiss='modal'>Jatka selailua</button>
+        <button type='button' routerLink='/maksu' data-dismiss='modal' class='btn btn-primary'>Mene kassalle</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tulostaa yhden valitun tuotteen käyttäjälle. Käyttäjä voi täältä lukea
+tuotteesta, katsoa samantyyppisiä tuotteita tai lisätä tuotteen tuotekoriin. -->
 <div class='row' *ngIf='product'>
   <div class='col-lg col-md-12 bg-white border'>
     <img class='img-fluid' [src]='imgurl + product.img' [alt]='product.img'>
@@ -23,8 +49,9 @@
     <a routerLink='/tuotelaji/{{ product.safetype }}'>
       {{ product.type }}</a>
     </p>
-    <button (click)='addToCart(product)' class='btn btn-primary'>
-      Lisää ostokoriin
+    <button (click)='addToCart(product)' class='btn btn-primary'
+      data-toggle='modal' data-target='#item-placed'>
+        Lisää ostokoriin
     </button>
   </div>
 </div>

@@ -4,7 +4,9 @@ const mongoose = require('mongoose');
 // Yhteys MLABIIN (pilvessä sijaitseva MongoDB-tietokanta)
 // Sijainti sekä käyttäjätiedot ovat piilossa .env-tiedostossa tietoturvasyistä.
 const conn = mongoose.connect (
-  process.env.DB_MLAB_URL, { useMongoClient: true }, err => {
+  process.env.DB_MLAB_URL, { useMongoClient: true, server: {
+    reconnectTries: Number.MAX_VALUE, reconnectInterval: 1000 }
+    }, err => {
       if (err) console.log('@@ SERVER @@: Error while connecting: ' + err);
       else console.log('@@ SERVER @@: Connected to database!');
 });

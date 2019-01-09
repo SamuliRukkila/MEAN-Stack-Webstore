@@ -28,16 +28,22 @@ export class FrontpageComponent implements OnInit {
     this.getProducts();
   }
 
+
   /*
-    KAIKKIEN TUOTTEIDEN HAKU
+   KAIKKIEN TUOTTEIDEN HAKU
+    Hakee kaikki tuotteet, mutta leikkaa osan niistä pois, jotta käyttäjälle
+    näytetään vain 12 tuotetta etusivulla. (3 X 4 GRID)
   */
   getProducts(): void {
     this.productService.getProducts()
-    .subscribe(product => this.products = product.slice(0, 9));
+    .subscribe(product => this.products = product.slice(0, 12));
   }
 
+
   /*
-    TUOTTEEN LISÄÄMINEN OSTOSKORIIN
+   TUOTTEEN LISÄÄMINEN OSTOSKORIIN
+    Kun käyttäjä klikkaa "Lisää ostoskoriin" -nappia, tämä funktio vie tiedon
+    siitä eteenpäin ProductCartServicelle.
   */
   addToCart(product: ProductCart) {
     this.productCartService.addToProductCart(product);

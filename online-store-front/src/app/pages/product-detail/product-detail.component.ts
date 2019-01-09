@@ -38,8 +38,12 @@ export class ProductDetailComponent implements OnInit {
     this.handleSubscription();
   }
 
-  // Hoitaa komponentin tilauksen => ottaa vastaan sivun urlin parametrin,
-  // jotta sivun vaihtaminen samassa komponentissa on mahdollista
+  /*
+   TILAUKSEN HOITO
+    Funktio ottaa URL-osoitteen parametrin muistiin. Parametri tilataan, jotta
+    saman komponentin sisällä oleva navigointi on mahdollista. Parametri
+    lähetetään toiselle funktiolle hoidettavaksi.
+  */
   handleSubscription(): void {
     this.productSubscription = this.route.params.subscribe(
       (params: Params) => this.getProduct(params.safename)
@@ -47,7 +51,8 @@ export class ProductDetailComponent implements OnInit {
   }
 
   /*
-    LISÄÄ TUOTTEEN OSTOSKORIIN
+   LISÄÄ TUOTTEEN OSTOSKORIIN
+    Nimensä mukaan funktio lisää tuotteen ostoskoriin.
   */
   addToCart(product: ProductCart) {
     this.productCartService.addToProductCart(product);
@@ -55,7 +60,7 @@ export class ProductDetailComponent implements OnInit {
 
 
   /*
-    HAETAAN TUOTTEEN TIEDOT
+   HAETAAN TUOTTEEN TIEDOT
     Haetaan osoitteen parametrin mukana tullut avainsana, joka tuodaan mukaan
     hakuun, jossa etsitään sitä vastaava tuote. Onnistuneissa tilanteissa
     tuotteen info jaetaan koko sivulle

@@ -8,6 +8,8 @@ import { UserService } from '../../services/user.service';
 import { ProductCart } from '../../dataclasses/ProductCart';
 import { User } from '../../dataclasses/User';
 
+
+
 @Component({
   selector: 'app-payment',
   templateUrl: './payment.component.html',
@@ -37,10 +39,12 @@ export class PaymentComponent implements OnInit {
     this.getUserInfo();
   }
 
+
   /*
-    HAKEE TUOTEKORIN
-    -  Servicestä jos sivua ei ole päivitetty (F5)
-    -  SessionStoragesta jos sivu on päivitetty eikä tieto ole servicessä
+   HAKEE TUOTEKORIN
+    Funktio joka hakee tuotekorin tilaamalla Subjectin ProductCartServicestä.
+    Jos sivu päivitetään eikä Subjectia päivity, haetaan tieto sen sijaan
+    varalta myös SessionStoragesta.
   */
   getProductCart(): void {
     this.productCartService.productCart
@@ -52,8 +56,10 @@ export class PaymentComponent implements OnInit {
     }
   }
 
+
   /*
-    KÄYTTÄJÄN TIETOJEN HAKU
+   HAKEE KÄYTTÄJÄN TIEDOT
+    Funktio, joka hakee kirjautuneen käyttäjän tiedot maksun varmistukseen.
   */
   getUserInfo(): void {
     this.userService.getUserInfo().subscribe(data => {
@@ -67,26 +73,46 @@ export class PaymentComponent implements OnInit {
   // Laskee ostoskorissa olevien tuotteiden yhteishinnan
   calcPrice(products: ProductCart[]): number {
     return this.productCartService.calcPrice(products);
-  }
-  // Laskee ostoskorissa olevian tuotteiden yhteishinnan, jakaa sen 12:sta,
-  // lisää 5 ja pyöristää 2 desimaalin tarkkuuteen
+  } // Laskee ostoskorissa olevian tuotteiden 12kk kuukausimaksun
   calcPriceAndRound(products: ProductCart[]): number {
     return Number((this.productCartService.calcPrice(products) / 12 + 5).toFixed(2));
-  }
-  // Laskee ostokorissa olevien tuotteiden määrän
+  } // Laskeaa kaikki tuotteet
   countProducts(products: ProductCart[]): number {
     return this.productCartService.countProducts(products);
   }
 
+
   /*
-    TUOTTEEN POISTO OSTOSKORISTA
+   TUOTTEEN POISTO OSTOSKORISTA
+    Poistaa tuotteen ProductCartServicen avulla tuotekorista.
   */
   removeFromBasket(ean: string): void {
     this.productCartService.removeFromBasket(ean);
   }
 
+
   /*
-    TUOTETILAUKSEN LÄHETTÄMINEN
+   LISÄÄ TUOTTEEN MÄÄRÄÄ OSTOSKORISSA
+    Nimensä mukaan lisää yhden (1) tuotteen jo olemassa olevaan tuotteseen.
+  */
+  increaseItem(ean: string): void {
+    this.productCartService.increaseItemFromBasket(ean);
+  }
+
+
+  /*
+   VÄHENTÄÄ TUOTTEEN MÄÄRÄÄ OSTOSKORISSA
+    Nimensä mukaan vähentää yhden (1) tuotteen jo olemassa olevasta tuotteesta.
+  */
+  decreaseItem(ean: string): void {
+    this.productCartService.decreaseItemFromBasket(ean);
+  }
+
+
+  /*
+   TUOTETILAUKSEN LÄHETTÄMINEN
+    Funktio lähettää valmiin tuotetilauksen palvelimeen, jossa se lisätään
+    käyttäjän tilaushistoriaan.
   */
   completeOrder(payment: string): void {
     this.userService.addNewPurchase(payment, this.calcPrice(this.products))

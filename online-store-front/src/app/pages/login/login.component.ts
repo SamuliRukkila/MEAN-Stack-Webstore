@@ -21,10 +21,30 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.checkLogin();
   }
 
+
   /*
-    KIRJAUTUMINEN
+   TARKISTAA KIRJAUTUNEISUUDEN
+    Jos käyttäjä on jo kirjautunut sisään ja hän koittaa navigoida Kirjaudu-
+    sivustolle, uudelleenohjataan hänet etusivulle. Tuplakirjautumisessa ei
+    kävisi muuta kuin, että vanhat tiedot ylikirjoitettaisiin, mutta on hyvä
+    käytänne kirjautua ulos ennenkuin kirjautuu toiselle käyttäjälle.
+  */
+  checkLogin(): void {
+    if (sessionStorage.getItem('credentials')) {
+      this.router.navigate(['/etusivu']);
+    }
+  }
+
+
+  /*
+   KIRJAUTUMINEN
+    Funktio kirjaa käyttäjän sisälle ottaen lomakkeen datan mukaan. Jos
+    käyttäjä on uudelleenohjattu sivustolle huonon autentikaation takia ja
+    hän kirjautuu onnistuneesti sisään, viedään hänet sivulle, jolle hän oli
+    navigoimassa (pl. admin sivut).
   */
   login(fData): void {
     this.logInfo = 'Kirjaudutaan sisään..';

@@ -3,7 +3,7 @@ sekä rekisteröityä palveluun. Admin-käyttäjäksi et voi rekisteröityä suo
 kautta vaan se pitää tehdä manuaalisesti palvelimen kautta tietoturvasyistä. */
 
 import { Injectable } from '@angular/core';
-import { Observable, Subject, throwError } from 'rxjs';
+import { Observable, Subject, throwError, pipe } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { JwtHelperService } from '@auth0/angular-jwt';
@@ -35,6 +35,7 @@ export class AuthService {
 
   // Paikallinen muuttuja Javascript Web Token -helperistä
   private jwtHelp = new JwtHelperService();
+
 
   /*
    INFORMOI TILAAJIA UUDESTA ARVOSTA KIRJAUTUMISTILANTEESTA
@@ -86,7 +87,9 @@ export class AuthService {
     Kirjaa käyttäjän. Katsoo, että backend palauttaa tokenin. Jos kirjautumis-
     tunnukset ovat oikein, tallennetaan käyttäjän sessiostorageen etunimi,
     sähköposti sekä token. Tämän tokenin avulla käyttäjä voi päästä sivuille,
-    jotka ovat tarkoitettu vain kirjautuneille.
+    jotka ovat tarkoitettu vain kirjautuneille. Jos käyttäjä on Admin,
+    lähetetään toiselle AdminSubjectille tieto siitä, jotta komponentit
+    tietävät, että käyttäjä on Admin-käyttäjä.
   */
   login(data): Observable<any> {
     return this.http.post(this.url + 'login', data, headers)
@@ -140,6 +143,14 @@ export class AuthService {
       const payload = this.jwtHelp.decodeToken(session.token);
       return (payload.isadmin ? true : false);
     } return false;
+  }
+
+
+  processSocialData(userData) {
+    this.http.post('http://localhost:3000/auth/google/', userData)
+      .pipe(
+        catchError(err => throwError(err)
+      ));
   }
 
 }

@@ -1,7 +1,8 @@
-<p class='alert alert-danger'>Kyseessä on ammattikorkeakoulun lopputyö. Sivusto
-EI ole oikea verkkokauppa. Älä anna oikeita tietojasi, koska ne säilytetään verkossa
-olevassa tietokannassa eikä tietojen täydellistä turvallisuutta voida varmistaa.
-Lähetyksesi eivät siirry mihinkään.</p>
+<p class='alert alert-danger text-center'>Kyseessä on ammattikorkeakoulun lopputyö.
+Sivusto EI ole oikea verkkokauppa.</p>
+
+<!-- Sivu sisältää maksutapahtuman tarpeelliset tiedot. Tuotteita voidaan vielä
+poistaa tässä vaiheessa. -->
 
 <h4 class='mb-4'>Tilauksen yhteenveto</h4>
 
@@ -31,6 +32,12 @@ Lähetyksesi eivät siirry mihinkään.</p>
         <td>
           <button type='button' class='btn btn-danger px-1 py-0'
             (click)='removeFromBasket(p.ean)'><i class='fa fa-trash'></i>
+          </button>
+          <button  class='btn btn-success py-0 px-2 ml-2'
+            (click)='increaseItem(p.ean)'>+
+          </button>
+          <button class='btn btn-danger py-0 px-2 ml-2'
+            (click)='decreaseItem(p.ean)'>-
           </button>
         </td>
       </tr>
@@ -112,6 +119,7 @@ Lähetyksesi eivät siirry mihinkään.</p>
 
 </form>
 
+<!-- Tilaus onnistui/epäonnistui -->
 <div *ngIf='paymentSuccess' class='alert alert-success mt-3'>
   {{ paymentSuccess }}
 </div>

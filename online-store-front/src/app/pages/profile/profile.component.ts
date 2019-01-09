@@ -14,6 +14,10 @@ import { User } from '../../dataclasses/User';
 })
 export class ProfileComponent implements OnInit {
 
+  // Kertoo käyttäjälle, että hänen haluamiaan muutoksia ollaan
+  // tekemässä visuaalisesti
+  public processing = false;
+
   // Root-osoite kuville
   public imageurl = environment.imageurl;
 
@@ -47,7 +51,9 @@ export class ProfileComponent implements OnInit {
   }
 
   /*
-    KÄYTTÄJÄN TIETOJEN HAKEMINEN
+   KÄYTTÄJÄN TIETOJEN HAKEMINEN
+    Funktio, joka hakee käyttäjän tiedot paikalliseen muuttujaan, jotta ne
+    voidaan tulostaa käyttäjälle muokattavaksi sekä katsottavaksi.
   */
   getUserInfo(): void {
     this.userService.getUserInfo().subscribe(data => {
@@ -60,7 +66,9 @@ export class ProfileComponent implements OnInit {
 
 
   /*
-    KÄYTTÄJÄLLE NÄKYVIEN LOMAKKEIDEN ARVOJEN PÄIVITTÄMINEN
+   KÄYTTÄJÄLLE NÄKYVIEN LOMAKKEIDEN ARVOJEN PÄIVITTÄMINEN
+    Funktiota kutsutaan useasti, jotta päivitykseen ei tarvita tilausta.
+    Parametrina saadaan päivittynyt käyttäjä, joka tulostetaan lomakkeeseen.
   */
   updateFields(data: User): void {
     this.user = data;
@@ -68,38 +76,44 @@ export class ProfileComponent implements OnInit {
 
 
   /*
-    KÄYTTÄJÄN TIETOJEN PÄIVITTÄMINEN
+   KÄYTTÄJÄN TIETOJEN PÄIVITTÄMINEN
+    Funktio joka päivittää osan tai kaikki (pl. _id, salasana & email) käyttäjän
+    tiedosista.
   */
   updateValues(fData: User): void {
-    if (fData === this.user) {
-      alert('ei samoja!');
-    } else {
+    this.processing = true;
     this.userService.updateUser(fData, this.user._id).subscribe(res => {
       this.updateFields(res);
+      this.processing = false;
       this.updSuccess = 'Päivitetty';
       setTimeout(() => this.updSuccess = '', 2000);
       }, err => {
+        this.processing = false;
         this.getUserInfo();
         this.updFailed = err;
         setTimeout(() => this.updFailed = '', 2000);
     });
-    }
   }
 
 
   /*
-    KÄYTTÄJÄN SALASANAN PÄIVITTÄMINEN
+   KÄYTTÄJÄN SALASANAN PÄIVITTÄMINEN
+    Funktio joka päivittää käyttäjän salasanan uuteen salasanaan. Heti alussa
+    katsotaan, etteivät salasanat ovat samoja.
   */
   updatePwd(fData): void {
     if (fData.oldPwd === fData.newPwd) {
       this.pwdUpdateFailed = 'Salasana ei voi olla sama';
       setTimeout(() => this.pwdUpdateFailed = '', 2000);
     } else {
+      this.processing = true;
       this.userService.updateUserPwd(fData, this.user._id)
         .subscribe(() => {
+          this.processing = false;
           this.pwdUpdateSuccess = 'Salasana päivitetty';
           setTimeout(() => this.pwdUpdateSuccess = '', 2000);
           }, err => {
+              this.processing = false;
               this.pwdUpdateFailed = err;
               setTimeout(() => this.pwdUpdateFailed = '', 2000);
         });
@@ -108,20 +122,26 @@ export class ProfileComponent implements OnInit {
 
 
   /*
-    KÄYTTÄJÄN POISTAMINEN
+   KÄYTTÄJÄN POISTAMINEN
+    Funktio joka poistaa käyttäjän tietokannasta kokonaan. Alussa varmistetaan
+    etteivät salasanat ovat samoja. Käyttäjä viedään etusivulle, sekä kirjataan
+    ulos.
   */
   deleteUser(fData): void {
     if (fData.password !== fData.rePassword) {
       this.deleteAccountFailed = 'Salasanat eivät täsmänneet';
       setTimeout(() => this.deleteAccountFailed = '', 2000);
     } else {
+      this.processing = true;
       this.userService.deleteUser(fData.password, this.user._id)
         .subscribe(res => {
+          this.processing = false;
           this.deleteAccountSuccess = res;
           sessionStorage.removeItem('credentials');
           this.authService.logOut();
           setTimeout(() => this.router.navigate(['/etusivu']), 1000);
         }, err => {
+            this.processing = false;
             this.deleteAccountFailed = err;
             setTimeout(() => this.deleteAccountFailed = '', 2000);
       });
