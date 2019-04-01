@@ -12,5 +12,5 @@ Sovelluksessa voit kirjautua sisään, rekisteröityä, tehdä tilauksia sekä t
 
 ## Linkkejä
 
-[Asiakaspuolen etusivu](https://tikorasia.jamk.fi/~wsk3/suhautus)
+[Asiakaspuolen etusivu](https://suhautus-webstore-front.herokuapp.com/#/etusivu)
 [Palvelinpuolen sivu](https://suhautus-webstore-front.herokuapp.com/#/etusivu)
