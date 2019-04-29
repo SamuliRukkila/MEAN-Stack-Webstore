@@ -4,7 +4,7 @@
 
 Kyseessä on MEAN-stackilla tehty web-sovelluskauppa. Asiakaspuolella toimii Angular 6.x.x ja palvelinpuolella Node.js ja Express.
 
-Palvelinpuoli sijaitsee Herokussa ja asiakaspuoli (väliaikaisesti) Tikorasiassa.
+Palvelinpuoli sekä asiakaspuoli sijaitset Herokun palvelimella.
 
 ## Mitä voit tehdä
 
