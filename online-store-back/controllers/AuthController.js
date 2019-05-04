@@ -103,7 +103,7 @@ const AuthController = {
         return res.status(404).send('Käyttäjää ei löytynyt');
       }
       // Väärä salasana
-      if (!bcrypt.compareSync(req.body.password, user.password)) {
+      if (!req.body.password || !bcrypt.compareSync(req.body.password, user.password)) {
         serverInfo('login()]: Wrong password: ' + req.body.email);
         return res.status(401).send('Väärä salasana');
       }
