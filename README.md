@@ -14,7 +14,7 @@ In this web-application, you can login, register, make order or just watch what 
 ## Admin
 
 When you're admin-user, you can update, delete or create new products and also see minified information from your users.
-Site doesn't include any unsafe-information so you can mess around with them all you want.
+You can mess around with them all you want - database is backed up.
 
 **Admin credentials**:
 - Username: admin.admin@admin.fi
