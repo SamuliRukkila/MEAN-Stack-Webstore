@@ -2,10 +2,16 @@
 
 Visit this [SITE](https://suhautus-webstore-front.herokuapp.com/#/etusivu).
 
+This is a fully working web-store created from stratch using Angular 6.x.x, Bootstrap and Node.js. Only thing which is missing is payment-methods (since this is only a student-project).
+
+### Note!
+
+The whole application resides in Heroku using only free plans so the first time you visit the site it can take some time before it fully loads.
+
 ## Program
 
 This is an online web-store made possible by MEAN-STACK (MongoDb, Express, Angular & Node.js).
-Both frontend and backend resides in Heroku. 
+Both frontend and backend resides in Heroku.
 
 ## What is possible
 
