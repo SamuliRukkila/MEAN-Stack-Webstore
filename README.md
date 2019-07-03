@@ -2,7 +2,7 @@
 
 Visit this [SITE](https://suhautus-webstore-front.herokuapp.com/#/etusivu).
 
-This is a fully working web-store created from stratch using Angular 6.x.x, Bootstrap and Node.js. Only thing which is missing is payment-methods (since this is only a student-project).
+This is a fully working web-store created from stratch using ```Angular 6.x.x```, ```Bootstrap``` and ```Node.js```. Only thing which is missing is payment-methods (since this is only a student-project).
 
 ### Note!
 
